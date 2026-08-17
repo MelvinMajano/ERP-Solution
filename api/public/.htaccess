@@ -1,0 +1,8 @@
+RewriteEngine On
+# Habilita el header Authorization para PHP
+RewriteCond %{HTTP:Authorization} ^(.+)$
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Redirige todo a index.php si no es archivo ni directorio real
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
