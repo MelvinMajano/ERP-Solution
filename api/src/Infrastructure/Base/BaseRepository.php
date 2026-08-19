@@ -2,6 +2,7 @@
 
 namespace Infrastructure\Base;
 
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -70,6 +71,15 @@ abstract class BaseRepository implements RepositoryInterface{
         return $this->query()->create($data);
     }
 
+    /**
+     * Actualiza un registro existente por su ID.
+     *
+     * @param int|string $id
+     * @param array<string, mixed> $data
+     * @var $record es la instancia del modelo ya que se utilza findById
+     * que retorna el modelo cuando encuentra una considencia 
+     * @return bool
+     */
     public function uptade(int | string $id,array $data):bool{
         $record = $this->findById($id);
         if(!$record){
@@ -78,6 +88,14 @@ abstract class BaseRepository implements RepositoryInterface{
         return (bool) $record->update($data);
     }
 
+    /**
+     * Elimina un registro por su ID.
+     * 
+     * @param int|string $id
+     * @var $record lo mismo que en el update, se optiene el modelo y
+     * luego en este caso se elimina ese registro
+     * @return bool
+     */
     public function delete(int | string $id):bool{
         $record= $this->findById($id);
         if(!$record){
@@ -85,8 +103,17 @@ abstract class BaseRepository implements RepositoryInterface{
         }
         return (bool) $record->delete();
     }
-    
-    public function paginate(int $perPage=10, $columns=['*']):mixed{
+
+    /**
+     * Obtiene los resultados paginados.
+     *
+     * @param int $perPage indica la cantidad de registros que se necesitan, 
+     * si no se envia una cantidad desde el front por defecto se enviaran 10 registros.
+     * @param array<int, string> $columns indica los campos que se necesitan 
+     * @return LengthAwarePaginator<TModel> retorna la data pagina + la informacion de la paginiacion
+     * total de registros, la pagina actual, la ultima pagina disponible, etc.
+     */
+    public function paginate(int $perPage=10, $columns=['*']):LengthAwarePaginator{
         return $this->query()->paginate($perPage,$columns);
     }
 
