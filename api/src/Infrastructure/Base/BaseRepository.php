@@ -67,7 +67,7 @@ abstract class BaseRepository implements RepositoryInterface{
      * @param array<string, mixed> $data
      * @return TModel
      */
-    public function create(array $data):mixed{
+    public function create(array $data):Model{
         return $this->query()->create($data);
     }
 
