@@ -9,7 +9,7 @@ class ForbiddenException extends InfrastructureException
 {
     public function __construct(
         string $message = "Acceso Prohibido",
-        protected array $errors = []
+        array $errors = []
     )
     {
         parent::__construct($message,StatusCodeInterface::STATUS_FORBIDDEN, $errors);
