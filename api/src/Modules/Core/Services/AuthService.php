@@ -9,6 +9,9 @@ use Throwable;
 
 class AuthService extends BaseService
 {
+    /**
+     * Decodifica y valida la firma del token JWT.
+     */
     public function checkToken(string $token):?object
     {
        try{
