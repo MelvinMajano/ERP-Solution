@@ -2,6 +2,7 @@
 
 namespace Infrastructure\Exceptions;
 
+use Domain\Exceptions\DomainException;
 use Illuminate\Database\QueryException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -23,7 +24,11 @@ class Handler implements ErrorHandlerInterface
        $message = "Ha ocurrido un error interno en el servidor.";
        $errors=[];
 
-     
+       if($exception instanceof DomainException){
+            $statusCode = 422;
+            $message = $exception->getMessage();
+            $errors = $exception->getErrors();
+       }
        elseif($exception instanceof InfrastructureException)
        {
         $statusCode = $exception->getStatuCode();
