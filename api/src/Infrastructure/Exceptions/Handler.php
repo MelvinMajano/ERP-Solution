@@ -88,6 +88,20 @@ class Handler implements ErrorHandlerInterface
             'errors'=>$errors,
        ];
 
+       /**
+        * Trazado de depuración adicional para desarrollo (APP_DEBUG=true)
+        * Es necesario revisar las variables de entorno para asegurar que (APP_DEBUG=true) en produccion se false, 
+        * pero en desarrollo True
+        */
+       if ($displayErrorDetails) {
+            $payload['debug'] = [
+                'exception' => get_class($exception),
+                'file'      => $exception->getFile(),
+                'line'      => $exception->getLine(),
+                'trace'     => explode("\n", $exception->getTraceAsString()),
+            ];
+        }
+
        $response = new SlimResponse($statusCode);
        $json = json_encode($payload,JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
        $response->getBody()->write($json);
