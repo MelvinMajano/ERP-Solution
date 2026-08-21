@@ -1,6 +1,7 @@
 <?php
 
 use Infrastructure\Exceptions\Handler;
+use Infrastructure\Middlewares\CorsMiddleware;
 use Slim\App;
 
 return function (App $app) {
