@@ -56,11 +56,15 @@ class Handler implements ErrorHandlerInterface
        }
        // Excepciones de base de datos (QueryBuilder / Eloquent)
        elseif ($exception instanceof QueryException) {
-        $statusCode = 400;
-        $message = 'Error en la consulta de base de datos';
+        $dbError = DatabaseErrorHandler::handle($exception);
+        $statusCode = $dbError['code'];
+        $message = $dbError['message'];
 
         if($displayErrorDetails){
-            $errors['sql_message']=$exception->getMessage();
+            $errors['sql_message']=[
+            "code"=>$exception->errorInfo[1]??null,
+            "message"=>$exception->getMessage()
+            ];
         }
        }
        // Excepciones no controladas de PHP
@@ -84,8 +88,10 @@ class Handler implements ErrorHandlerInterface
             'errors'=>$errors,
        ];
 
-       $response = new SlimResponse();
-       $json = json_encode($payload);
-       return $response;
+       $response = new SlimResponse($statusCode);
+       $json = json_encode($payload,JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+       $response->getBody()->write($json);
+       return $response
+            ->withHeader('Content-Type','application/json');
     }
 }
