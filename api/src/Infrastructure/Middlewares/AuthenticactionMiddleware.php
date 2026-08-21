@@ -2,13 +2,13 @@
 
 namespace Infrastructure\Middlewares;
 
-use Fig\Http\Message\StatusCodeInterface;
+use Infrastructure\Exceptions\ForbiddenException;
+use Infrastructure\Exceptions\UnauthorizedException;
 use Modules\Core\Services\AuthService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Slim\Psr7\Response;
 
 class AuthenticactionMiddleware implements MiddlewareInterface
 {
@@ -17,20 +17,26 @@ class AuthenticactionMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $header = $request->getHeaderLine("Authorization");
-
+        // Valida si viene el token en el encabezado
         if (!$header || !preg_match('/Bearer\s(\S+)/', $header, $matches)) {
-            return $this->buildErrorResponse('token de authenticacion requerido', StatusCodeInterface::STATUS_UNAUTHORIZED);
+            throw new UnauthorizedException('Token de autenticacion requerido',['token'=>'missing']);
         }
 
+        //Decodifica el token
         $token = $matches[1];
         $decoded = $this->authService->checkToken($token);
 
+        //Valida si el token es valido
         if(!$decoded){
-            return $this->buildErrorResponse('Token inválido o expirado', StatusCodeInterface::STATUS_UNAUTHORIZED);
+            throw new UnauthorizedException('Token invalido o expirado',['token' => 'invalid_or_expired']);
         }
 
+        //Valida que el token no sea un token temporal
         if (!isset($decoded->type) || $decoded->type !== 'session_token') {
-            return $this->buildErrorResponse('Acceso no autorizado. Debe completar la autenticación en dos pasos', StatusCodeInterface::STATUS_FORBIDDEN);
+            throw new ForbiddenException(
+                'Acceso no autorizado. Debe completar la validación de contraseña', 
+                ['auth' => 'password_step_required']
+            );
         }
 
         $request=$request
@@ -41,3 +47,4 @@ class AuthenticactionMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 }
+ 
