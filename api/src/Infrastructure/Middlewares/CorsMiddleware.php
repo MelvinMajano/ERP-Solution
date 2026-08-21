@@ -1,6 +1,6 @@
 <?php
 
-namespace POS\Middlewares;
+namespace Infrastructure\Middlewares;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
