@@ -89,8 +89,8 @@ class Handler implements ErrorHandlerInterface
        ];
 
        /**
-        * Trazado de depuración adicional para desarrollo (APP_DEBUG=true)
-        * Es necesario revisar las variables de entorno para asegurar que (APP_DEBUG=true) en produccion se false, 
+        * Trazado de depuración adicional para desarrollo API_PROD = True
+        * Es necesario revisar las variables de entorno para asegurar que API_PROD en produccion se false, 
         * pero en desarrollo True
         */
        if ($displayErrorDetails) {
