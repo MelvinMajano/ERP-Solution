@@ -1,6 +1,6 @@
 <?php
 
-namespace POS\Validators\Rules;
+namespace Infrastructure\Rules\RulesValidator;
 
 use Rakit\Validation\Rule;
 
