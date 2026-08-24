@@ -2,6 +2,7 @@
 
 namespace Infrastructure\Rules\RulesValidator;
 
+use Domain\Enums\GeneralStatus;
 use Rakit\Validation\Rule;
 
 /**
