@@ -3,17 +3,17 @@
 namespace Infrastructure\Base;
 
 use Infrastructure\Exceptions\ValidationException;
-use Infrastructure\Validators\Rules\Address;
-use Infrastructure\Validators\Rules\AlphaExtended;
-use Infrastructure\Validators\Rules\Description;
-use Infrastructure\Validators\Rules\ExistsActive;
-use Infrastructure\Validators\Rules\ExistsIn;
-use Infrastructure\Validators\Rules\InEnum;
-use Infrastructure\Validators\Rules\OnlyDigits;
-use Infrastructure\Validators\Rules\PhoneNumber;
-use Infrastructure\Validators\Rules\SecurePassword;
-use Infrastructure\Validators\Rules\UniqueIn;
-use Infrastructure\Validators\Rules\Username;
+use Infrastructure\Rules\RulesValidator\Address;
+use Infrastructure\Rules\RulesValidator\AlphaExtended;
+use Infrastructure\Rules\RulesValidator\Description;
+use Infrastructure\Rules\RulesValidator\ExistsActive;
+use Infrastructure\Rules\RulesValidator\ExistsIn;
+use Infrastructure\Rules\RulesValidator\InEnum;
+use Infrastructure\Rules\RulesValidator\OnlyDigits;
+use Infrastructure\Rules\RulesValidator\PhoneNumber;
+use Infrastructure\Rules\RulesValidator\SecurePassword;
+use Infrastructure\Rules\RulesValidator\UniqueIn;
+use Infrastructure\Rules\RulesValidator\Username;
 use Rakit\Validation\Validation;
 use Rakit\Validation\Validator;
 
