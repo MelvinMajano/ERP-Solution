@@ -65,7 +65,7 @@ class Product extends Model
             );
         }
     }
-
+    //valida de que el nuevo costo no sea negativo
     public function updateCost(float $newCost): void
     {
         if ($newCost < 0) {
@@ -73,7 +73,9 @@ class Product extends Model
         }
         $this->cost = $newCost;
     }
-
+    /**
+     * Incrementa (+) o decrementa (-) el stock físico actual.
+     */
     public function applyStockDelta(float $delta): void
     {
         $this->current_stock += $delta;
