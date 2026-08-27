@@ -8,15 +8,17 @@ use Exception;
  * El proposito de esta clase es centralizar las exepciones de la logica de negocio
  * del sistema 
  */
-abstract class DomainException extends Exception
+class DomainException extends Exception
 {   
     //Inicializa la excepcion del dominio
     public function __construct(
         string $message,
-        protected array $errors = []
+        protected array $errors = [],
+        int $code = 0,
+        ?\Throwable $previous = null
     )
     {
-        parent::__construct($message);
+        parent::__construct($message,$code, $previous);
     }
 
     /**
