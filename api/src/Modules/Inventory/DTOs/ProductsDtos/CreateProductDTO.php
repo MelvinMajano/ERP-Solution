@@ -33,7 +33,7 @@ readonly class CreateProductDTO
          barcode: isset($validatedData['barcode'])?(string) $validatedData['barcode']:null,
          currentStock:isset($validatedData['current_stock'])?(float) $validatedData['current_stock']:0.0,
          isService: (bool) ($validatedData['is_service']??false),
-         isActive: (bool) ($validatedData['is_active']??false),
+         isActive: (bool) ($validatedData['is_active']??true),
         );
     }
 
