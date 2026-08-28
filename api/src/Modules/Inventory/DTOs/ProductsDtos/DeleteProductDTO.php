@@ -18,7 +18,7 @@ readonly class DeleteProductDTO
     {
         return new self
         (
-            id: (int) $validatedData('id')
+            id: (int) $validatedData['id']
         );
     }
 
