@@ -2,7 +2,7 @@
 
 namespace Modules\Inventory\DTOs\ProductsDtos;
 
-readonly class GetProductByIdDT
+readonly class GetProductByIdDTO
 {
     public function __construct(
         public int $id
