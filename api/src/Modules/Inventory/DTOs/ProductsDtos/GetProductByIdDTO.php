@@ -9,6 +9,11 @@ readonly class GetProductByIdDT
     )
     {}
 
+    /**
+     * Crea una instancia a partir de un array de datos validados.
+     * 
+     * @param array<string, mixed> $validatedData
+     */
     public static function fromValidatedData(array $validatedData):self
     {
         return new self
@@ -17,6 +22,11 @@ readonly class GetProductByIdDT
         );
     }
 
+    /**
+     * Convierte el DTO en un array asociativo.
+     *
+     * @return array<string, mixed> 
+     */
     public function toArray():array
     {
         return 
