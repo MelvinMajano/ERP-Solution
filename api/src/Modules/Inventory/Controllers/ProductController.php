@@ -2,7 +2,10 @@
 
 namespace Modules\Inventory\Controllers;
 
+use Fig\Http\Message\StatusCodeInterface;
+use Illuminate\Pagination\Paginator;
 use Infrastrucure\Base\BaseController;
+use Modules\Inventory\DTOs\ProductsDtos\CreateProductDTO;
 use Modules\Inventory\DTOs\ProductsDtos\GetProductByIdDTO;
 use Modules\Inventory\DTOs\ProductsDtos\ProductsFilterQueryDTO;
 use Modules\Inventory\Services\ProductService;
@@ -49,6 +52,23 @@ class ProductController extends BaseController
             response:$response,
             data: $this->productTransformer->transform($product),
             message: 'Producto obtenido con exito',
+        );
+    }
+
+    public function create(Request $request, Response $response):Response
+    {
+        $body = $request->getParsedBody();
+        $validatedData = ProductValidator::createValidation($body);
+
+        $createDto = CreateProductDTO::fromValidatedData($validatedData);
+
+        $product = $this->productService->createProduct($createDto);
+
+        return $this->jsonResponse(
+            response:$response,
+            data: $this->productTransformer->transform($product),
+            message: 'Producto creado con exito',
+            statusCode: StatusCodeInterface::STATUS_CREATED
         );
     }
 }
