@@ -81,4 +81,21 @@ class ProductValidator extends BaseValidator
 
         return static::validationCheck($validation);
     }
+
+    //Se encarga de validar la data que se necesita en el setStatuProduct
+    public static function setStatusValidation(int $id, ?array $data): array
+    {
+        $payload = array_merge($data ?? [], ['id' => $id]);
+
+        $rules = [
+            'id'        => 'required|integer|min:1',
+            'is_active' => 'required|boolean',
+        ];
+
+        $validation = self::makeValidator($payload, $rules);
+        $validation->setAliases(self::ALIAS);
+        $validation->validate();
+
+        return static::validationCheck($validation);
+    }
 }
