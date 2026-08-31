@@ -6,6 +6,7 @@ use Fig\Http\Message\StatusCodeInterface;
 use Illuminate\Pagination\Paginator;
 use Infrastrucure\Base\BaseController;
 use Modules\Inventory\DTOs\ProductsDtos\CreateProductDTO;
+use Modules\Inventory\DTOs\ProductsDtos\DeleteProductDTO;
 use Modules\Inventory\DTOs\ProductsDtos\GetProductByIdDTO;
 use Modules\Inventory\DTOs\ProductsDtos\ProductsFilterQueryDTO;
 use Modules\Inventory\DTOs\ProductsDtos\SetStatusProductDTO;
@@ -105,6 +106,22 @@ class ProductController extends BaseController
             response:$response,
             data: $this->productTransformer->transform($product),
             message:'Estado del producto actualizado correctamente',
+        );
+    }
+
+    public function delete(Request $request, Response $response, array $args):Response
+    {
+        $id= (int) $args['id'];
+        
+        $validatedData = ProductValidator::deleteValidation($id);
+        $deleteDto = DeleteProductDTO::fromValidatedData($validatedData);
+
+        $this->productService->deleteProduct($deleteDto);
+
+        return $this->jsonResponse(
+            response:$response,
+            data: null,
+            message: 'Product eliminado con exito'
         );
     }
 }
