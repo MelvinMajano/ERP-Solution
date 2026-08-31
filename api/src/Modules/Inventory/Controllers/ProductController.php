@@ -9,6 +9,7 @@ use Modules\Inventory\DTOs\ProductsDtos\CreateProductDTO;
 use Modules\Inventory\DTOs\ProductsDtos\GetProductByIdDTO;
 use Modules\Inventory\DTOs\ProductsDtos\ProductsFilterQueryDTO;
 use Modules\Inventory\DTOs\ProductsDtos\SetStatusProductDTO;
+use Modules\Inventory\DTOs\ProductsDtos\UpdateProductDTO;
 use Modules\Inventory\Services\ProductService;
 use Modules\Inventory\Transformers\ProductTransformer;
 use Modules\Inventory\Validators\ProductValidator;
@@ -73,10 +74,27 @@ class ProductController extends BaseController
         );
     }
 
+    public function update(Request $request, Response $response, array $args):Response
+    {
+        $id = (int) $args['id'];
+        $body = (array) $request->getParsedBody();
+
+        $validatedData = ProductValidator::updateValidation($id, $body);
+        $updateDto = UpdateProductDTO::fromValidatedData($validatedData);
+
+        $product = $this->productService->updateProduct($updateDto);
+
+        return $this->jsonResponse(
+            response:$response,
+            data: $this->productTransformer->transform($product),
+            message: 'Proudcto actualizado existosamente'
+        );
+    }
+
     public function setStatus(Request $resquest, Response $response, array $args):Response
     {
         $id =(int) $args['id'];
-        $body = $resquest->getParsedBody();
+        $body = (array) $resquest->getParsedBody();
 
         $validatedData = ProductValidator::setStatusValidation($id,$body);
         $setStatusDto = SetStatusProductDTO::fromValidatedData($validatedData);
