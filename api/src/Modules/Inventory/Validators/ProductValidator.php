@@ -99,7 +99,7 @@ class ProductValidator extends BaseValidator
         return static::validationCheck($validation);
     }
 
-     //Se encarga de validar que id por medio del cual se eliminara el producto ese valido y es obligatorio
+    //Se encarga de validar que id por medio del cual se eliminara el producto ese valido y es obligatorio
     public static function deleteValidation(int $id): array
     {
         $rules = [
