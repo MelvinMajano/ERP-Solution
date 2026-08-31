@@ -18,4 +18,18 @@ class ProductValidator extends BaseValidator
         'is_service'          => 'es un servicio',
         'is_active'           => 'estado activo'
     ];
+
+    //se encarga de asegurar que el id necesario para getById sea valido.
+    public static function getByIdValidation(int $id):array
+    {
+        $rules =[
+            'id'=>'required|integer|min:1'
+        ];
+
+        $validation = self::makeValidator(['id'=>$id],$rules);
+        $validation->setAliases(self::ALIAS);
+        $validation->validate();
+
+        return static::validationCheck($validation);
+    }
 }
