@@ -21,6 +21,26 @@ class ProductValidator extends BaseValidator
         'is_active'           => 'estado activo'
     ];
 
+    /**
+     * Valida los parámetros de consulta para la paginación y filtrado.
+     */
+    public static function getValidation(array $queryParams):array
+    {
+        $rules=[
+            'page'      => 'nullable|integer|min:1',
+            'pageSize'  => 'nullable|integer|min:1|max:100',
+            'sortBy'    => 'nullable|string',
+            'sortDir'   => 'nullable|string|in:asc,desc,ASC,DESC',
+            'filters'   => 'nullable|array',
+        ];
+
+        $validation = self::makeValidator($queryParams,$rules);
+        $validation->setAliases(self::ALIAS);
+        $validation->validate();
+
+        return static::validationCheck($validation);
+    }
+
     //se encarga de asegurar que el id necesario para getById sea valido.
     public static function getByIdValidation(int $id):array
     {
@@ -39,9 +59,9 @@ class ProductValidator extends BaseValidator
     public static function createValidation(?array $data): array
     {
         $rules=[
-            'primary_supplier_id'=>'nullable|intenger|exists_active' . Supplier::class . ',id',
-            'sku'                =>'required|max:50|alpha_dash|unique_in' . Product::class . ',sku',
-            'barcode'            =>'nullable|max:100|alpha_num|unique_in' . Product::class . ',barcode',
+            'primary_supplier_id'=>'nullable|integer|exists_active:' . Supplier::class . ',id',
+            'sku'                =>'required|max:50|alpha_dash|unique_in:' . Product::class . ',sku',
+            'barcode'            =>'nullable|max:100|alpha_num|unique_in:' . Product::class . ',barcode',
             'name'               =>'required|max:150|alpha_extended',
             'price'              =>'required|numeric|min:0|max:999999998',
             'cost'               =>'required|numeric|min:0|max:999999998',
