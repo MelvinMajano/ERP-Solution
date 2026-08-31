@@ -56,4 +56,29 @@ class ProductValidator extends BaseValidator
 
         return static::validationCheck($validation);
     }
+
+    //Se encarga de validar la data que se necesita en el UpdateProduct
+    public static function updateValidation(int $id, ?array $data): array
+    {
+        $payload = array_merge($data ?? [], ['id' => $id]);
+
+        $rules = [
+            'id'                  => 'required|integer|min:1',
+            'primary_supplier_id' => 'nullable|integer|exists_active:' . Supplier::class . ',id',
+            'sku'                 => 'nullable|max:50|alpha_dash|unique_in:' . Product::class . ',sku,' . $id,
+            'barcode'             => 'nullable|max:100|alpha_num|unique_in:' . Product::class . ',barcode,' . $id,
+            'name'                => 'nullable|max:150|alpha_extended',
+            'price'               => 'nullable|numeric|min:0|max:999999998',
+            'cost'                => 'nullable|numeric|min:0|max:999999998',
+            'current_stock'       => 'nullable|numeric|min:0',
+            'is_service'          => 'nullable|boolean',
+            'is_active'           => 'nullable|boolean',
+        ];
+
+        $validation = self::makeValidator($payload, $rules);
+        $validation->setAliases(self::ALIAS);
+        $validation->validate();
+
+        return static::validationCheck($validation);
+    }
 }
