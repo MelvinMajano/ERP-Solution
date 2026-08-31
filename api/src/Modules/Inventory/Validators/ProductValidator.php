@@ -2,6 +2,8 @@
 
 namespace Modules\Inventory\Validators;
 
+use Domain\Entities\Product;
+use Domain\Entities\Supplier;
 use Infrastructure\Base\BaseValidator;
 
 class ProductValidator extends BaseValidator
@@ -27,6 +29,28 @@ class ProductValidator extends BaseValidator
         ];
 
         $validation = self::makeValidator(['id'=>$id],$rules);
+        $validation->setAliases(self::ALIAS);
+        $validation->validate();
+
+        return static::validationCheck($validation);
+    }
+
+    //Se encarga de validar la data que se necesita en el createProduct
+    public static function createValidation(?array $data): array
+    {
+        $rules=[
+            'primary_supplier_id'=>'nullable|intenger|exists_active' . Supplier::class . ',id',
+            'sku'                =>'required|max:50|alpha_dash|unique_in' . Product::class . ',sku',
+            'barcode'            =>'nullable|max:100|alpha_num|unique_in' . Product::class . ',barcode',
+            'name'               =>'required|max:150|alpha_extended',
+            'price'              =>'required|numeric|min:0|max:999999998',
+            'cost'               =>'required|numeric|min:0|max:999999998',
+            'current_stock'      =>'nullable|numeric|min:0',
+            'is_service'         =>'nullable|boolean',
+            'is_active'          =>'nullable|boolean',
+        ];
+
+        $validation = self::makeValidator($data, $rules);
         $validation->setAliases(self::ALIAS);
         $validation->validate();
 
