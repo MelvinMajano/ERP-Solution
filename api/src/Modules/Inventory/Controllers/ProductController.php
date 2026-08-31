@@ -8,6 +8,7 @@ use Infrastrucure\Base\BaseController;
 use Modules\Inventory\DTOs\ProductsDtos\CreateProductDTO;
 use Modules\Inventory\DTOs\ProductsDtos\GetProductByIdDTO;
 use Modules\Inventory\DTOs\ProductsDtos\ProductsFilterQueryDTO;
+use Modules\Inventory\DTOs\ProductsDtos\SetStatusProductDTO;
 use Modules\Inventory\Services\ProductService;
 use Modules\Inventory\Transformers\ProductTransformer;
 use Modules\Inventory\Validators\ProductValidator;
@@ -69,6 +70,23 @@ class ProductController extends BaseController
             data: $this->productTransformer->transform($product),
             message: 'Producto creado con exito',
             statusCode: StatusCodeInterface::STATUS_CREATED
+        );
+    }
+
+    public function setStatus(Request $resquest, Response $response, array $args):Response
+    {
+        $id =(int) $args['id'];
+        $body = $resquest->getParsedBody();
+
+        $validatedData = ProductValidator::setStatusValidation($id,$body);
+        $setStatusDto = SetStatusProductDTO::fromValidatedData($validatedData);
+
+        $product = $this->productService->setStatus($setStatusDto);
+
+        return $this->jsonResponse(
+            response:$response,
+            data: $this->productTransformer->transform($product),
+            message:'Estado del producto actualizado correctamente',
         );
     }
 }
