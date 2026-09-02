@@ -25,6 +25,7 @@ $app->setBasePath($_ENV['API_BASE_PATH']);
 (require __DIR__ . '/../config/middleware.php')($app);
 
 (require __DIR__ . '/../src/Configs/database.php')();
-(require __DIR__ . '/../src/Routes/main.php')($app);
+//Carga la configuracion de las rutas 
+(require __DIR__ . '/../config/routes.php')($app);
 
 $app->run();
