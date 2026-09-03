@@ -4,7 +4,7 @@
 
 -- 1. Empresas o Clientes del SaaS (Tenants)
 CREATE TABLE tenants (
-    id VARCHAR(36) PRIMARY KEY COMMENT 'Identificador único UUID de la empresa/inquilino (tenant).',
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental de la empresa/inquilino (tenant).',
     company_name VARCHAR(150) NOT NULL COMMENT 'Nombre comercial o razón social de la empresa cliente del SaaS.',
     subdomain VARCHAR(50) UNIQUE NOT NULL COMMENT 'Subdominio asignado a la empresa para acceso (ej. empresa.saas.com).',
     status VARCHAR(20) NOT NULL DEFAULT 'active' COMMENT 'Estado del inquilino en la plataforma SaaS (ej. active, suspended, canceled).',
@@ -22,7 +22,7 @@ CREATE TABLE modules (
 
 -- 3. Módulos Habilitados por Empresa
 CREATE TABLE tenant_modules (
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'ID de la empresa/tenant a la que se le asigna el módulo.',
+    tenant_id INT NOT NULL COMMENT 'ID de la empresa/tenant a la que se le asigna el módulo.',
     module_id VARCHAR(50) NOT NULL COMMENT 'ID del módulo habilitado para la empresa.',
     is_enabled BOOLEAN DEFAULT TRUE COMMENT 'Estado de activación del módulo para la empresa específica.',
     expires_at TIMESTAMP NULL COMMENT 'Fecha de expiración o renovación de la suscripción al módulo.',
@@ -47,7 +47,7 @@ CREATE TABLE permissions (
 -- 5. Roles Personalizados por Empresa
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del rol.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la cual pertenece este rol personalizado.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la cual pertenece este rol personalizado.',
     name VARCHAR(100) NOT NULL COMMENT 'Nombre asignado al rol (ej. Administrador, Cajero, Inventariador).',
     description VARCHAR(255) NULL COMMENT 'Descripción de las funciones asignadas a este rol.',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de creación del rol.',
@@ -70,7 +70,7 @@ CREATE TABLE rol_permissions (
 -- 7. Usuarios del Sistema
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del usuario.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa (tenant) a la que pertenece el usuario.',
+    tenant_id INT NOT NULL COMMENT 'Empresa (tenant) a la que pertenece el usuario.',
     username VARCHAR(50) NOT NULL COMMENT 'Nombre de usuario único dentro de la empresa para iniciar sesión.',
     password VARCHAR(255) NOT NULL COMMENT 'Contraseña encriptada (hash) del usuario.',
     first_names VARCHAR(100) NOT NULL COMMENT 'Nombres del usuario.',
@@ -93,8 +93,8 @@ CREATE TABLE users (
 
 -- 8. Proveedores
 CREATE TABLE suppliers (
-    id VARCHAR(36) PRIMARY KEY COMMENT 'Identificador único UUID del proveedor.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la que pertenece este proveedor.',
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del proveedor.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece este proveedor.',
     rtn VARCHAR(20) NULL COMMENT 'Registro Tributario Nacional del proveedor (Honduras - SAR).',
     name VARCHAR(150) NOT NULL COMMENT 'Nombre comercial o de fantasía del proveedor.',
     business_name VARCHAR(200) NULL COMMENT 'Razón social legal del proveedor registrada ante la SAR.',
@@ -112,12 +112,12 @@ CREATE TABLE suppliers (
 
 -- 9. Catálogo de Productos
 CREATE TABLE products (
-    id VARCHAR(36) PRIMARY KEY COMMENT 'Identificador único UUID del producto.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la que pertenece el producto.',
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del producto.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece el producto.',
     sku VARCHAR(50) NOT NULL COMMENT 'Código único de control interno del producto por empresa.',
     barcode VARCHAR(100) NULL COMMENT 'Código de barras para escaneo físico en punto de venta (POS).',
     name VARCHAR(150) NOT NULL COMMENT 'Nombre o descripción comercial del producto.',
-    primary_supplier_id VARCHAR(36) NULL COMMENT 'Proveedor principal o habitual para reabastecimiento.',
+    primary_supplier_id INT NULL COMMENT 'Proveedor principal o habitual para reabastecimiento.',
     price DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Precio de venta base al público antes de impuestos.',
     cost DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Costo unitario actual de adquisición del producto.',
     current_stock DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Existencia o stock físico actual consolidado.',
@@ -137,7 +137,7 @@ CREATE TABLE products (
 -- 10. Motivos de Movimiento de Inventario
 CREATE TABLE movement_reasons (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del motivo de movimiento.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la que pertenece este motivo.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece este motivo.',
     name VARCHAR(150) NOT NULL COMMENT 'Nombre descriptivo de la causa (ej. Venta POS, Compra directa, Ajuste por merma).',
     movement_type VARCHAR(10) NOT NULL COMMENT 'Tipo de efecto físico en stock: IN (Entrada) o OUT (Salida).',
     is_active BOOLEAN DEFAULT TRUE COMMENT 'Indica si el motivo está disponible para ser seleccionado.',
@@ -147,9 +147,9 @@ CREATE TABLE movement_reasons (
 
 -- 11. Kardex de Inventario (Auditoría Histórica de Stock)
 CREATE TABLE inventory_movements (
-    id VARCHAR(36) PRIMARY KEY COMMENT 'Identificador único UUID del movimiento de inventario.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la que pertenece la transacción.',
-    product_id VARCHAR(36) NOT NULL COMMENT 'Producto afectado por el movimiento.',
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del movimiento de inventario.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece la transacción.',
+    product_id INT NOT NULL COMMENT 'Producto afectado por el movimiento.',
     movement_reason_id INT NOT NULL COMMENT 'ID de la causa o motivo registrado para este movimiento.',
     type VARCHAR(10) NOT NULL COMMENT 'Dirección del movimiento: IN (Entrada) u OUT (Salida).',
     quantity DECIMAL(12, 4) NOT NULL COMMENT 'Cantidad física de unidades que ingresaron o salieron.',
@@ -157,7 +157,7 @@ CREATE TABLE inventory_movements (
     new_stock DECIMAL(12, 4) NOT NULL COMMENT 'Stock o existencia posterior al movimiento (Previous +/- Quantity).',
     unit_cost DECIMAL(12, 4) NOT NULL COMMENT 'Costo unitario del producto al momento exacto del movimiento.',
     reference_type VARCHAR(50) NOT NULL COMMENT 'Origen de la transacción (ej. SALE, PURCHASE, MANUAL_ADJUSTMENT).',
-    reference_id VARCHAR(36) NULL COMMENT 'ID del documento de origen (ID de factura de venta, ID de compra, etc.).',
+    reference_id INT NULL COMMENT 'ID del documento de origen (ID de factura de venta, ID de compra, etc.).',
     notes VARCHAR(255) NULL COMMENT 'Observaciones o notas adicionales aclaratorias sobre el movimiento.',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora exacta en que se registró el movimiento.',
     created_by INT NOT NULL COMMENT 'ID del usuario que ejecutó o registró el movimiento.',
@@ -174,8 +174,8 @@ CREATE TABLE inventory_movements (
 
 -- 12. Clientes
 CREATE TABLE customers (
-    id VARCHAR(36) PRIMARY KEY COMMENT 'Identificador único UUID del cliente.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la que pertenece el cliente.',
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del cliente.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece el cliente.',
     rtn VARCHAR(20) NULL COMMENT 'Registro Tributario Nacional para facturación a personas jurídicas/comerciales.',
     dni VARCHAR(20) NULL COMMENT 'Documento Nacional de Identificación para cliente persona natural.',
     name VARCHAR(150) NOT NULL COMMENT 'Nombre completo o nombre comercial del cliente.',
@@ -194,15 +194,15 @@ CREATE TABLE customers (
 
 -- 13. Cabecera de Ventas / Facturas
 CREATE TABLE sales_invoices (
-    id VARCHAR(36) PRIMARY KEY COMMENT 'Identificador único UUID de la factura de venta.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la que pertenece la venta.',
-    customer_id VARCHAR(36) NOT NULL COMMENT 'Cliente al que se le emite la factura.',
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental de la factura de venta.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece la venta.',
+    customer_id INT NOT NULL COMMENT 'Cliente al que se le emite la factura.',
     invoice_number VARCHAR(50) NOT NULL COMMENT 'Número correlativo o número fiscal de la factura de venta.',
     cashier_user_id INT NOT NULL COMMENT 'ID del cajero/usuario que procesó la venta en caja.',
     
     -- Campos reservados para expansión futura (CAI / Exenciones SAR)
-    cai_id VARCHAR(36) NULL COMMENT 'Campo reservado: ID del rango CAI asignado por la SAR.',
-    cash_batch_id VARCHAR(36) NULL COMMENT 'ID del turno de caja abierto en el que se realizó la venta.',
+    cai_id INT NULL COMMENT 'Campo reservado: ID del rango CAI asignado por la SAR.',
+    cash_batch_id INT NULL COMMENT 'ID del turno de caja abierto en el que se realizó la venta.',
     exempt_order_number VARCHAR(100) NULL COMMENT 'Campo reservado: Número de orden de compra exenta (normativa SAR).',
     exempt_certificate_number VARCHAR(100) NULL COMMENT 'Campo reservado: Constancia de registro de exonerado (normativa SAR).',
     exempt_sag_number VARCHAR(100) NULL COMMENT 'Campo reservado: Registro SAG para exención agrícola (normativa SAR).',
@@ -227,9 +227,9 @@ CREATE TABLE sales_invoices (
 -- 14. Detalle de Ventas
 CREATE TABLE sales_invoice_details (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del detalle de venta.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la que pertenece este detalle.',
-    invoice_id VARCHAR(36) NOT NULL COMMENT 'ID de la factura cabecera a la que pertenece esta línea.',
-    product_id VARCHAR(36) NOT NULL COMMENT 'ID del producto vendido.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece este detalle.',
+    invoice_id INT NOT NULL COMMENT 'ID de la factura cabecera a la que pertenece esta línea.',
+    product_id INT NOT NULL COMMENT 'ID del producto vendido.',
     product_name VARCHAR(150) NOT NULL COMMENT 'Snapshot o copia textual del nombre del producto al momento de facturar.',
     quantity DECIMAL(12, 4) NOT NULL COMMENT 'Cantidad de unidades vendidas.',
     unit_price DECIMAL(12, 4) NOT NULL COMMENT 'Precio unitario de venta aplicado en esta línea.',
@@ -254,9 +254,9 @@ CREATE TABLE sales_invoice_details (
 
 -- 15. Compras Directas
 CREATE TABLE purchases (
-    id VARCHAR(36) PRIMARY KEY COMMENT 'Identificador único UUID de la compra directa.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la que pertenece el registro de compra.',
-    supplier_id VARCHAR(36) NOT NULL COMMENT 'Proveedor al que se le realizó la compra.',
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental de la compra directa.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece el registro de compra.',
+    supplier_id INT NOT NULL COMMENT 'Proveedor al que se le realizó la compra.',
     supplier_invoice_number VARCHAR(50) NOT NULL COMMENT 'Número de factura o documento físico emitido por el proveedor.',
     subtotal DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Suma de importes brutos de la compra antes de impuestos.',
     tax_total DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Monto total del impuesto de venta pagado en la compra.',
@@ -273,9 +273,9 @@ CREATE TABLE purchases (
 -- 16. Detalle de Compras Directas
 CREATE TABLE purchase_details (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del detalle de compra.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la que pertenece esta línea de compra.',
-    purchase_id VARCHAR(36) NOT NULL COMMENT 'ID de la compra cabecera a la que pertenece esta línea.',
-    product_id VARCHAR(36) NOT NULL COMMENT 'Producto reabastecido en la compra.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece esta línea de compra.',
+    purchase_id INT NOT NULL COMMENT 'ID de la compra cabecera a la que pertenece esta línea.',
+    product_id INT NOT NULL COMMENT 'Producto reabastecido en la compra.',
     quantity DECIMAL(12, 4) NOT NULL COMMENT 'Cantidad de unidades compradas/ingresadas.',
     unit_cost DECIMAL(12, 4) NOT NULL COMMENT 'Costo unitario de adquisición negociado con el proveedor.',
     tax_rate DECIMAL(5, 2) NOT NULL DEFAULT 15.00 COMMENT 'Porcentaje de impuesto soportado en la compra (ej. 15.00).',
@@ -293,8 +293,8 @@ CREATE TABLE purchase_details (
 
 -- 17. Turnos / Apertura y Cierre de Caja
 CREATE TABLE cash_batches (
-    id VARCHAR(36) PRIMARY KEY COMMENT 'Identificador único UUID de la sesión/turno de caja.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la que pertenece el turno de caja.',
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental de la sesión/turno de caja.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece el turno de caja.',
     cashier_user_id INT NOT NULL COMMENT 'Usuario/Cajero responsable de la caja durante este turno.',
     opening_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora exactas de apertura de la caja.',
     closing_date TIMESTAMP NULL COMMENT 'Fecha y hora exactas de cierre del turno de caja.',
@@ -316,8 +316,8 @@ CREATE TABLE cash_batches (
 -- 18. Arqueo por Denominación de Billetes/Monedas (Honduras HNL)
 CREATE TABLE cash_batch_details (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del desglose de dinero.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la que pertenece el desglose.',
-    cash_batch_id VARCHAR(36) NOT NULL COMMENT 'ID del turno de caja al que corresponde este conteo físico.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece el desglose.',
+    cash_batch_id INT NOT NULL COMMENT 'ID del turno de caja al que corresponde este conteo físico.',
     bill_value ENUM(
         '0.05', '0.10', '0.20', '0.50',
         '1', '2', '5', '10', '20', '50', '100', '200', '500'
@@ -334,13 +334,13 @@ CREATE TABLE cash_batch_details (
 
 -- 19. Movimientos Directos de Dinero en Caja
 CREATE TABLE cash_movements (
-    id VARCHAR(36) PRIMARY KEY COMMENT 'Identificador único UUID del movimiento manual o automático de caja.',
-    tenant_id VARCHAR(36) NOT NULL COMMENT 'Empresa a la que pertenece el movimiento.',
-    cash_batch_id VARCHAR(36) NOT NULL COMMENT 'Turno de caja afectado por la entrada/salida de dinero.',
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del movimiento manual o automático de caja.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece el movimiento.',
+    cash_batch_id INT NOT NULL COMMENT 'Turno de caja afectado por la entrada/salida de dinero.',
     type VARCHAR(10) NOT NULL COMMENT 'Tipo de flujo monetario: INCOME (Entrada de dinero) o EXPENSE (Salida/Aporte).',
     amount DECIMAL(12, 4) NOT NULL COMMENT 'Monto exacto de dinero ingresado o retirado de la caja.',
     reference_type VARCHAR(50) NOT NULL COMMENT 'Origen del flujo de efectivo (ej. SALE, PURCHASE, MANUAL_ADJUSTMENT, PETTY_CASH).',
-    reference_id VARCHAR(36) NULL COMMENT 'ID del documento de soporte vinculado (ID de venta, ID de compra, etc.).',
+    reference_id INT NULL COMMENT 'ID del documento de soporte vinculado (ID de venta, ID de compra, etc.).',
     description VARCHAR(255) NULL COMMENT 'Justificación o concepto del movimiento en caja.',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora exacta del movimiento.',
     created_by INT NOT NULL COMMENT 'ID del usuario autor/responsable de la transacción.',
