@@ -21,8 +21,8 @@ $app->setBasePath($_ENV['API_BASE_PATH']);
 
 //Carga la configuración de Middlewares desde config/middleware.php
 (require __DIR__ . '/../config/middleware.php')($app);
-
-(require __DIR__ . '/../src/Configs/database.php')();
+//Carga la configuracion de la base de datos
+(require __DIR__ . '/../config/database.php')();
 //Carga la configuracion de las rutas 
 (require __DIR__ . '/../config/routes.php')($app);
 
