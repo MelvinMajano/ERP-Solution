@@ -9,6 +9,7 @@
         "illuminate/pagination": "^12.67",
         "illuminate/support": "^12.67",
         "firebase/php-jwt": "^7.0",
-        "rakit/validation": "^1.4"
+        "rakit/validation": "^1.4",
+        "illuminate/events": "^12.67"
     }
 }
