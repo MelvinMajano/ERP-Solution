@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # Contenedor PHP (Slim 4 + Eloquent)
+  api:
+    build:
+      context: ..
+      dockerfile: docker/php/Dockerfile
+    container_name: saas_erp_api
+    restart: always
+    working_dir: /var/www/html/api
+    volumes:
+      - ../api:/var/www/html/api
+      - ./php/vhost-main.conf:/etc/apache2/sites-available/000-default.conf
+    ports:
+      - "${API_PORT:-8080}:80"
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+
+  # Contenedor MySQL 8.0
+  mysql:
+    image: mysql:8.0
+    container_name: saas_erp_mysql
+    restart: always
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secure_pass_2026}
+      MYSQL_DATABASE: ${DB_DATABASE:-saas_erp_db}
+      MYSQL_USER: ${DB_USERNAME:-saas_erp_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-saas_erp_pass_2026}
+    volumes:
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./mysql/seeders.sql:/docker-entrypoint-initdb.d/02-seeders.sql
+      - ../database:/docker-entrypoint-initdb.d/scripts
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
