@@ -29,8 +29,8 @@ class ProductValidator extends BaseValidator
         $rules=[
             'page'      => 'nullable|integer|min:1',
             'pageSize'  => 'nullable|integer|min:1|max:100',
-            'sortBy'    => 'nullable|string',
-            'sortDir'   => 'nullable|string|in:asc,desc,ASC,DESC',
+            'sortBy'    => 'nullable|alpha_dash',
+            'sortDir'   => 'nullable|alpha_dash|in:asc,desc,ASC,DESC',
             'filters'   => 'nullable|array',
         ];
 
