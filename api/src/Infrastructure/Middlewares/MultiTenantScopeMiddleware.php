@@ -2,7 +2,7 @@
 
 namespace Infrastructure\Middlewares;
 
-use Illuminate\Support\Facades\Context;
+use Infrastructure\Context\TenantContext;
 use Infrastructure\Exceptions\ForbiddenException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -10,18 +10,17 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 /**
- * Este middleware es el que controla si en la peticion viene el tenant_id
- * y si es asi lo inyecta en el contexto para no tener que colocarlo en cada 
- * consulta de manera manual
+ * Controla si en la petición viene el tenant_id, lo inyecta en el TenantContext
+ * para aislar las consultas de Eloquent y garantiza su limpieza al finalizar la solicitud.
  */
 class MultiTenantScopeMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        //Obtiene el tenant_id inyectado previamente por AuthenticationMiddleware
+        // Obtiene el tenant_id inyectado previamente por AuthenticationMiddleware
         $tenantId = $request->getAttribute('tenant_id');
 
-        //Valida de que el tenant_id exista
+        // Valida que el tenant_id exista
         if (empty($tenantId)) {
             throw new ForbiddenException(
                 'No se ha podido determinar el inquilino para procesar esta solicitud',
@@ -29,9 +28,15 @@ class MultiTenantScopeMiddleware implements MiddlewareInterface
             );
         }
 
-        //Inyecta el tenant_id en el Context global de la petición HTTP
-        Context::add('tenant_id', $tenantId);
+        // Inyecta el tenant_id en el contexto propio de la petición
+        TenantContext::set((int) $tenantId);
 
-        return $handler->handle($request);
+        try {
+            // Pasa la solicitud al siguiente middleware o controlador
+            return $handler->handle($request);
+        } finally {
+            // Limpia el estado en memoria para evitar la contaminación entre peticiones (Swoole, RoadRunner, PHP-FPM)
+            TenantContext::clear();
+        }
     }
 }
