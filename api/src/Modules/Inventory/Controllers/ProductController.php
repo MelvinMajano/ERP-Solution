@@ -4,7 +4,7 @@ namespace Modules\Inventory\Controllers;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Illuminate\Pagination\Paginator;
-use Infrastrucure\Base\BaseController;
+use Infrastructure\Base\BaseController;
 use Modules\Inventory\DTOs\ProductsDtos\CreateProductDTO;
 use Modules\Inventory\DTOs\ProductsDtos\DeleteProductDTO;
 use Modules\Inventory\DTOs\ProductsDtos\GetProductByIdDTO;
