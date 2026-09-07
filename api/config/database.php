@@ -3,9 +3,13 @@
 use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Support\Facades\Facade;
+
 //configuracion de elequent
 return function (): Capsule {
-    $capsule = new Capsule();
+    //Instancia el contenedor de Illuminate
+    $container = new Container();
+    $capsule = new Capsule($container);
 
     $capsule->addConnection([
         'driver'    => $_ENV['DB_DRIVER'] ?? 'mysql',
@@ -25,6 +29,9 @@ return function (): Capsule {
     $capsule->setAsGlobal();
     // Inicializa Eloquent ORM
     $capsule->bootEloquent();
+
+    //Vincula el contenedor de Illuminate a las Fachadas estáticas para poder utilizar el context
+    Facade::setFacadeApplication($container);
 
     return $capsule;
 };
