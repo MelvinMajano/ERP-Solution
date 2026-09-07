@@ -3,17 +3,21 @@
 use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Events\Dispatcher;
-use Illuminate\Support\Facades\Facade;
 
-//configuracion de elequent
+/**
+ * Configuración e inicialización de Eloquent ORM mediante Capsule Manager.
+ */
 return function (): Capsule {
-    //Instancia el contenedor de Illuminate
+    // Instancia el contenedor de inyección de dependencias de Illuminate
     $container = new Container();
+    
+    // Inicia Capsule pasando el contenedor para gestionar las dependencias de Eloquent
     $capsule = new Capsule($container);
 
+    // Configura los parámetros de conexión a la base de datos principal
     $capsule->addConnection([
         'driver'    => $_ENV['DB_DRIVER'] ?? 'mysql',
-        'host'      => $_ENV['DB_HOST'] ?? 'mysql', // Nombre del servicio en docker-compose
+        'host'      => $_ENV['DB_HOST'] ?? 'mysql', // Nombre del servicio en Docker
         'port'      => $_ENV['DB_PORT'] ?? '3306',
         'database'  => $_ENV['DB_DATABASE'] ?? 'saas_erp_db',
         'username'  => $_ENV['DB_USERNAME'] ?? 'saas_erp_user',
@@ -23,15 +27,14 @@ return function (): Capsule {
         'prefix'    => '',
     ]);
 
-    // Asigna el despachador de eventos directamente
-    $capsule->setEventDispatcher(new Dispatcher(new Container()));
+    // Registra el despachador de eventos compartiendo la misma instancia del contenedor
+    $capsule->setEventDispatcher(new Dispatcher($container));
+    
     // Permite acceder a la instancia de Capsule globalmente mediante métodos estáticos
     $capsule->setAsGlobal();
-    // Inicializa Eloquent ORM
+    
+    // Inicializa el ORM Eloquent para el mapeo de modelos
     $capsule->bootEloquent();
-
-    //Vincula el contenedor de Illuminate a las Fachadas estáticas para poder utilizar el context
-    Facade::setFacadeApplication($container);
 
     return $capsule;
 };
