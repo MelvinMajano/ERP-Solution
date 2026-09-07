@@ -1,4 +1,11 @@
 {
+    "autoload": {
+    "psr-4": {
+        "Domain\\": "src/Domain/",
+        "Infrastructure\\": "src/Infrastructure/",
+        "Modules\\": "src/Modules/"
+    }
+},
     "require": {
         "slim/slim": "4.*",
         "slim/psr7": "^1.8",
