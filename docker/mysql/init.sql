@@ -1,5 +1,5 @@
 -- =============================================================================
--- SAAS ERP V1.0 - INITIAL SCHEMA (MYSQL 8.0 COMPATIBLE)
+-- SAAS ERP V1.0 - SCHEME DDL COMPLETO (MYSQL 8.0 COMPATIBLE)
 -- =============================================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -8,282 +8,344 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- CAPA BASE SAAS & CONTROL DE ACCESO (CORE)
 -- -----------------------------------------------------------------------------
 
--- 1. Tenants (Empresas del SaaS)
+-- 1. Empresas o Clientes del SaaS (Tenants)
 CREATE TABLE IF NOT EXISTS tenants (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    company_name VARCHAR(150) NOT NULL,
-    subdomain VARCHAR(50) NOT NULL UNIQUE,
-    status VARCHAR(20) NOT NULL DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental de la empresa/inquilino (tenant).',
+    company_name VARCHAR(150) NOT NULL COMMENT 'Nombre comercial o razón social de la empresa cliente del SaaS.',
+    subdomain VARCHAR(50) UNIQUE NOT NULL COMMENT 'Subdominio asignado a la empresa para acceso (ej. empresa.saas.com).',
+    status VARCHAR(20) NOT NULL DEFAULT 'active' COMMENT 'Estado del inquilino en la plataforma SaaS (ej. active, suspended, canceled).',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro de la empresa en la plataforma.',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha y hora de la última actualización de datos de la empresa.'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 2. Catálogo Global de Módulos
+-- 2. Catálogo Global de Módulos del ERP
 CREATE TABLE IF NOT EXISTS modules (
-    id VARCHAR(50) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    is_active BOOLEAN DEFAULT TRUE
+    id VARCHAR(50) PRIMARY KEY COMMENT 'Clave primaria identificadora del módulo (ej. inventory, sales, purchases, cash).',
+    name VARCHAR(100) NOT NULL COMMENT 'Nombre visible del módulo en la interfaz de usuario.',
+    description TEXT NULL COMMENT 'Descripción detallada de las funcionalidades que abarca el módulo.',
+    is_active BOOLEAN DEFAULT TRUE COMMENT 'Indica si el módulo está disponible globalmente en la plataforma.'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 3. Módulos Habilitados por Tenant
+-- 3. Módulos Habilitados por Empresa
 CREATE TABLE IF NOT EXISTS tenant_modules (
-    tenant_id INT NOT NULL,
-    module_id VARCHAR(50) NOT NULL,
-    is_enabled BOOLEAN DEFAULT TRUE,
-    expires_at TIMESTAMP NULL,
+    tenant_id INT NOT NULL COMMENT 'ID de la empresa/tenant a la que se le asigna el módulo.',
+    module_id VARCHAR(50) NOT NULL COMMENT 'ID del módulo habilitado para la empresa.',
+    is_enabled BOOLEAN DEFAULT TRUE COMMENT 'Estado de activación del módulo para la empresa específica.',
+    expires_at TIMESTAMP NULL COMMENT 'Fecha de expiración o renovación de la suscripción al módulo.',
     PRIMARY KEY (tenant_id, module_id),
-    CONSTRAINT fk_tm_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    CONSTRAINT fk_tm_module FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 4. Catálogo Global de Permisos
+-- 4. Permisos Globales del Sistema
 CREATE TABLE IF NOT EXISTS permissions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    module_id VARCHAR(50) NOT NULL,
-    section VARCHAR(100) NOT NULL,
-    action VARCHAR(100) NOT NULL,
-    description TEXT,
-    level ENUM('low', 'medium', 'high') NOT NULL DEFAULT 'low',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_perm_module FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE,
-    UNIQUE KEY uq_module_section_action (module_id, section, action)
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del permiso.',
+    module_id VARCHAR(50) NOT NULL COMMENT 'Módulo al que pertenece el permiso.',
+    section VARCHAR(100) NOT NULL COMMENT 'Sección o recurso específico del sistema (ej. products, invoices, users).',
+    action VARCHAR(100) NOT NULL COMMENT 'Acción concreta autorizada (ej. create, read, update, delete).',
+    description TEXT NULL COMMENT 'Explicación del alcance y propósito del permiso.',
+    level ENUM('low', 'medium', 'high') NOT NULL DEFAULT 'low' COMMENT 'Nivel de criticidad del permiso para auditoría y seguridad.',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de creación del permiso.',
+    FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE,
+    UNIQUE(module_id, section, action)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 5. Roles Personalizados por Tenant
+-- 5. Roles Personalizados por Empresa
 CREATE TABLE IF NOT EXISTS roles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    description VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT NULL,
-    CONSTRAINT fk_roles_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    UNIQUE KEY uq_tenant_role_name (tenant_id, name)
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del rol.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la cual pertenece este rol personalizado.',
+    name VARCHAR(100) NOT NULL COMMENT 'Nombre asignado al rol (ej. Administrador, Cajero, Inventariador).',
+    description VARCHAR(255) NULL COMMENT 'Descripción de las funciones asignadas a este rol.',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de creación del rol.',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha de última modificación del rol.',
+    created_by INT NULL COMMENT 'ID del usuario que creó el rol.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    UNIQUE(tenant_id, name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 6. Asignación de Permisos a Roles (Pivot)
+-- 6. Asignación de Permisos a Roles
 CREATE TABLE IF NOT EXISTS rol_permissions (
-    rol_id INT NOT NULL,
-    permission_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    rol_id INT NOT NULL COMMENT 'ID del rol al que se otorga el permiso.',
+    permission_id INT NOT NULL COMMENT 'ID del permiso otorgado al rol.',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora en que se asignó el permiso al rol.',
     PRIMARY KEY (rol_id, permission_id),
-    CONSTRAINT fk_rp_rol FOREIGN KEY (rol_id) REFERENCES roles(id) ON DELETE CASCADE,
-    CONSTRAINT fk_rp_permission FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
+    FOREIGN KEY (rol_id) REFERENCES roles(id) ON DELETE CASCADE,
+    FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 7. Usuarios del Sistema
 CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    username VARCHAR(50) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    first_names VARCHAR(100) NOT NULL,
-    last_names VARCHAR(100) NOT NULL,
-    email VARCHAR(150) NOT NULL,
-    rol_id INT NOT NULL,
-    status VARCHAR(20) DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT NULL,
-    CONSTRAINT fk_users_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    CONSTRAINT fk_users_rol FOREIGN KEY (rol_id) REFERENCES roles(id),
-    UNIQUE KEY uq_tenant_username (tenant_id, username),
-    UNIQUE KEY uq_tenant_email (tenant_id, email)
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del usuario.',
+    tenant_id INT NOT NULL COMMENT 'Empresa (tenant) a la que pertenece el usuario.',
+    username VARCHAR(50) NOT NULL COMMENT 'Nombre de usuario único dentro de la empresa para iniciar sesión.',
+    password VARCHAR(255) NOT NULL COMMENT 'Contraseña encriptada (hash) del usuario.',
+    first_names VARCHAR(100) NOT NULL COMMENT 'Nombres del usuario.',
+    last_names VARCHAR(100) NOT NULL COMMENT 'Apellidos del usuario.',
+    email VARCHAR(150) NOT NULL COMMENT 'Correo electrónico único del usuario para notificaciones y acceso.',
+    rol_id INT NOT NULL COMMENT 'Rol asignado que determina los permisos del usuario.',
+    status VARCHAR(20) DEFAULT 'active' COMMENT 'Estado de la cuenta del usuario (ej. active, inactive, locked).',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro del usuario.',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha de última actualización del usuario.',
+    created_by INT NULL COMMENT 'ID del usuario creador de la cuenta.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (rol_id) REFERENCES roles(id),
+    UNIQUE(tenant_id, username),
+    UNIQUE(tenant_id, email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
+-- =============================================================================
 -- MÓDULO 1: INVENTARIO (PRODUCTOS FÍSICOS & KARDEX)
--- -----------------------------------------------------------------------------
+-- =============================================================================
 
--- 8. Catálogo de Productos
-CREATE TABLE IF NOT EXISTS products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    sku VARCHAR(50) NOT NULL,
-    name VARCHAR(150) NOT NULL,
-    price DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
-    cost DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
-    current_stock DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_products_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    UNIQUE KEY uq_tenant_sku (tenant_id, sku),
-    INDEX idx_products_tenant (tenant_id, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 9. Kardex Físico (Movimientos de Inventario)
-CREATE TABLE IF NOT EXISTS inventory_movements (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    product_id INT NOT NULL,
-    type VARCHAR(10) NOT NULL, -- 'IN', 'OUT'
-    quantity DECIMAL(12, 4) NOT NULL,
-    reference_type VARCHAR(50) NOT NULL, -- 'MANUAL', 'SALE', 'PURCHASE'
-    reference_id INT NULL,
-    notes VARCHAR(255) NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by INT NOT NULL,
-    CONSTRAINT fk_im_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    CONSTRAINT fk_im_product FOREIGN KEY (product_id) REFERENCES products(id),
-    CONSTRAINT fk_im_user FOREIGN KEY (created_by) REFERENCES users(id),
-    INDEX idx_kardex_tenant_product (tenant_id, product_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- -----------------------------------------------------------------------------
--- MÓDULO 2: VENTAS Y FACTURACIÓN DIRECTA
--- -----------------------------------------------------------------------------
-
--- 10. Directorio de Clientes
-CREATE TABLE IF NOT EXISTS customers (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    tax_id VARCHAR(50) NULL,
-    name VARCHAR(150) NOT NULL,
-    email VARCHAR(150) NULL,
-    phone VARCHAR(50) NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_customers_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    INDEX idx_customers_tenant (tenant_id, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 11. Cabecera de Ventas / Facturas
-CREATE TABLE IF NOT EXISTS sales_invoices (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    customer_id INT NOT NULL,
-    invoice_number VARCHAR(50) NOT NULL,
-    total_amount DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by INT NOT NULL,
-    CONSTRAINT fk_sales_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    CONSTRAINT fk_sales_customer FOREIGN KEY (customer_id) REFERENCES customers(id),
-    CONSTRAINT fk_sales_user FOREIGN KEY (created_by) REFERENCES users(id),
-    UNIQUE KEY uq_tenant_invoice_number (tenant_id, invoice_number),
-    INDEX idx_sales_tenant (tenant_id, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 12. Detalle de Ventas
-CREATE TABLE IF NOT EXISTS sales_invoice_details (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    invoice_id INT NOT NULL,
-    product_id INT NOT NULL,
-    quantity DECIMAL(12, 4) NOT NULL,
-    unit_price DECIMAL(12, 4) NOT NULL,
-    subtotal DECIMAL(12, 4) NOT NULL,
-    CONSTRAINT fk_sid_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    CONSTRAINT fk_sid_invoice FOREIGN KEY (invoice_id) REFERENCES sales_invoices(id) ON DELETE CASCADE,
-    CONSTRAINT fk_sid_product FOREIGN KEY (product_id) REFERENCES products(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- -----------------------------------------------------------------------------
--- MÓDULO 3: COMPRAS DIRECTAS A PROVEEDORES
--- -----------------------------------------------------------------------------
-
--- 13. Directorio de Proveedores
+-- 8. Proveedores
 CREATE TABLE IF NOT EXISTS suppliers (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    tax_id VARCHAR(50) NULL,
-    name VARCHAR(150) NOT NULL,
-    email VARCHAR(150) NULL,
-    phone VARCHAR(50) NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_suppliers_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del proveedor.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece este proveedor.',
+    rtn VARCHAR(20) NULL COMMENT 'Registro Tributario Nacional del proveedor (Honduras - SAR).',
+    name VARCHAR(150) NOT NULL COMMENT 'Nombre comercial o de fantasía del proveedor.',
+    business_name VARCHAR(200) NULL COMMENT 'Razón social legal del proveedor registrada ante la SAR.',
+    email VARCHAR(150) NULL COMMENT 'Correo electrónico de contacto comercial o pedidos.',
+    phone VARCHAR(50) NULL COMMENT 'Número telefónico de contacto del proveedor.',
+    address VARCHAR(255) NULL COMMENT 'Dirección física u oficina del proveedor.',
+    is_active BOOLEAN DEFAULT TRUE COMMENT 'Indica si el proveedor está habilitado para compras.',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro del proveedor.',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha de última actualización del proveedor.',
+    created_by INT NOT NULL COMMENT 'ID del usuario que registró al proveedor.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id),
     INDEX idx_suppliers_tenant (tenant_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 14. Cabecera de Compras Directas
+-- 9. Catálogo de Productos
+CREATE TABLE IF NOT EXISTS products (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del producto.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece el producto.',
+    sku VARCHAR(50) NOT NULL COMMENT 'Código único de control interno del producto por empresa.',
+    barcode VARCHAR(100) NULL COMMENT 'Código de barras para escaneo físico en punto de venta (POS).',
+    name VARCHAR(150) NOT NULL COMMENT 'Nombre o descripción comercial del producto.',
+    primary_supplier_id INT NULL COMMENT 'Proveedor principal o habitual para reabastecimiento.',
+    price DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Precio de venta base al público antes de impuestos.',
+    cost DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Costo unitario actual de adquisición del producto.',
+    current_stock DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Existencia o stock físico actual consolidado.',
+    is_service BOOLEAN DEFAULT FALSE COMMENT 'Flag que indica si es un servicio intangible.',
+    is_active BOOLEAN DEFAULT TRUE COMMENT 'Indica si el producto está disponible para venta/compra.',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de creación del producto.',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha de última modificación del producto.',
+    created_by INT NOT NULL COMMENT 'ID del usuario que registró el producto.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (primary_supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    UNIQUE (tenant_id, sku),
+    INDEX idx_products_tenant (tenant_id, id),
+    INDEX idx_products_barcode (tenant_id, barcode)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 10. Motivos de Movimiento de Inventario
+CREATE TABLE IF NOT EXISTS movement_reasons (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único del motivo de movimiento.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece este motivo.',
+    name VARCHAR(150) NOT NULL COMMENT 'Nombre descriptivo de la causa (ej. Venta POS, Compra directa, Ajuste por merma).',
+    movement_type VARCHAR(10) NOT NULL COMMENT 'Tipo de efecto físico en stock: IN (Entrada) o OUT (Salida).',
+    is_active BOOLEAN DEFAULT TRUE COMMENT 'Indica si el motivo está disponible para ser seleccionado.',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creación del motivo.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 11. Kardex de Inventario (Auditoría Histórica de Stock)
+CREATE TABLE IF NOT EXISTS inventory_movements (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del movimiento de inventario.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece la transacción.',
+    product_id INT NOT NULL COMMENT 'Producto afectado por el movimiento.',
+    movement_reason_id INT NOT NULL COMMENT 'ID de la causa o motivo registrado para este movimiento.',
+    type VARCHAR(10) NOT NULL COMMENT 'Dirección del movimiento: IN (Entrada) u OUT (Salida).',
+    quantity DECIMAL(12, 4) NOT NULL COMMENT 'Cantidad física de unidades que ingresaron o salieron.',
+    previous_stock DECIMAL(12, 4) NOT NULL COMMENT 'Stock o existencia exacta del producto antes de ejecutar el movimiento.',
+    new_stock DECIMAL(12, 4) NOT NULL COMMENT 'Stock o existencia posterior al movimiento (Previous +/- Quantity).',
+    unit_cost DECIMAL(12, 4) NOT NULL COMMENT 'Costo unitario del producto al momento exacto del movimiento.',
+    reference_type VARCHAR(50) NOT NULL COMMENT 'Origen de la transacción (ej. SALE, PURCHASE, MANUAL_ADJUSTMENT).',
+    reference_id INT NULL COMMENT 'ID del documento de origen (ID de factura de venta, ID de compra, etc.).',
+    notes VARCHAR(255) NULL COMMENT 'Observaciones o notas adicionales aclaratorias sobre el movimiento.',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora exacta en que se registró el movimiento.',
+    created_by INT NOT NULL COMMENT 'ID del usuario que ejecutó o registró el movimiento.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id),
+    FOREIGN KEY (movement_reason_id) REFERENCES movement_reasons(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    INDEX idx_kardex_tenant_product (tenant_id, product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================================
+-- MÓDULO 2: CLIENTES, VENTAS Y FACTURACIÓN DIRECTA
+-- =============================================================================
+
+-- 12. Clientes
+CREATE TABLE IF NOT EXISTS customers (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del cliente.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece el cliente.',
+    rtn VARCHAR(20) NULL COMMENT 'Registro Tributario Nacional para facturación a personas jurídicas/comerciales.',
+    dni VARCHAR(20) NULL COMMENT 'Documento Nacional de Identificación para cliente persona natural.',
+    name VARCHAR(150) NOT NULL COMMENT 'Nombre completo o nombre comercial del cliente.',
+    business_name VARCHAR(200) NULL COMMENT 'Razón social registrada ante la SAR (si aplica).',
+    email VARCHAR(150) NULL COMMENT 'Correo electrónico para envío de facturas digitales.',
+    phone VARCHAR(50) NULL COMMENT 'Número de teléfono de contacto.',
+    address VARCHAR(255) NULL COMMENT 'Dirección de entrega o domicilio fiscal.',
+    is_active BOOLEAN DEFAULT TRUE COMMENT 'Indica si el cliente está activo para realizar ventas.',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creación del expediente del cliente.',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha de última actualización del cliente.',
+    created_by INT NOT NULL COMMENT 'ID del usuario que registró al cliente.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    INDEX idx_customers_tenant (tenant_id, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 13. Cabecera de Ventas / Facturas
+CREATE TABLE IF NOT EXISTS sales_invoices (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental de la factura de venta.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece la venta.',
+    customer_id INT NOT NULL COMMENT 'Cliente al que se le emite la factura.',
+    invoice_number VARCHAR(50) NOT NULL COMMENT 'Número correlativo o número fiscal de la factura de venta.',
+    cashier_user_id INT NOT NULL COMMENT 'ID del cajero/usuario que procesó la venta en caja.',
+    
+    cai_id INT NULL COMMENT 'Campo reservado: ID del rango CAI asignado por la SAR.',
+    cash_batch_id INT NULL COMMENT 'ID del turno de caja abierto en el que se realizó la venta.',
+    exempt_order_number VARCHAR(100) NULL COMMENT 'Campo reservado: Número de orden de compra exenta (normativa SAR).',
+    exempt_certificate_number VARCHAR(100) NULL COMMENT 'Campo reservado: Constancia de registro de exonerado (normativa SAR).',
+    exempt_sag_number VARCHAR(100) NULL COMMENT 'Campo reservado: Registro SAG para exención agrícola (normativa SAR).',
+    
+    subtotal DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Suma del subtotal de las líneas antes de descuentos e impuestos.',
+    discount_total DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Monto total descontado en la factura.',
+    tax_total DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Monto total cobrado por concepto de ISV.',
+    net_total DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Monto final neto a pagar por el cliente.',
+    
+    status VARCHAR(20) NOT NULL DEFAULT 'ISSUED' COMMENT 'Estado de la factura (ej. ISSUED, VOIDED, PENDING).',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora exacta de emisión de la factura.',
+    created_by INT NOT NULL COMMENT 'ID del usuario que registró la factura.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customers(id),
+    FOREIGN KEY (cashier_user_id) REFERENCES users(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    UNIQUE (tenant_id, invoice_number),
+    INDEX idx_sales_tenant (tenant_id, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 14. Detalle de Ventas
+CREATE TABLE IF NOT EXISTS sales_invoice_details (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del detalle de venta.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece este detalle.',
+    invoice_id INT NOT NULL COMMENT 'ID de la factura cabecera a la que pertenece esta línea.',
+    product_id INT NOT NULL COMMENT 'ID del producto vendido.',
+    product_name VARCHAR(150) NOT NULL COMMENT 'Snapshot del nombre del producto al momento de facturar.',
+    quantity DECIMAL(12, 4) NOT NULL COMMENT 'Cantidad de unidades vendidas.',
+    unit_price DECIMAL(12, 4) NOT NULL COMMENT 'Precio unitario de venta aplicado en esta línea.',
+    unit_cost DECIMAL(12, 4) NOT NULL COMMENT 'Snapshot del costo unitario del producto al venderlo.',
+    tax_rate DECIMAL(5, 2) NOT NULL DEFAULT 15.00 COMMENT 'Porcentaje de impuesto aplicable (ISV).',
+    
+    line_subtotal DECIMAL(12, 4) NOT NULL COMMENT 'Subtotal bruto de la línea (Quantity * Unit Price).',
+    discount_percentage DECIMAL(5, 2) NOT NULL DEFAULT 0.00 COMMENT 'Porcentaje de descuento otorgado en esta línea.',
+    line_discount DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Monto monetario del descuento otorgado en la línea.',
+    line_tax_amount DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Monto monetario de impuesto calculado para la línea.',
+    line_net_total DECIMAL(12, 4) NOT NULL COMMENT 'Monto total neto cobrado por esta línea.',
+    exempt_amount DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Monto exento o exonerado de impuesto en la línea.',
+    
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (invoice_id) REFERENCES sales_invoices(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================================
+-- MÓDULO 3: COMPRAS DIRECTAS A PROVEEDORES
+-- =============================================================================
+
+-- 15. Compras Directas
 CREATE TABLE IF NOT EXISTS purchases (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    supplier_id INT NOT NULL,
-    supplier_invoice_number VARCHAR(50) NOT NULL,
-    total_amount DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
-    purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by INT NOT NULL,
-    CONSTRAINT fk_purchases_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    CONSTRAINT fk_purchases_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
-    CONSTRAINT fk_purchases_user FOREIGN KEY (created_by) REFERENCES users(id)
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental de la compra directa.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece el registro de compra.',
+    supplier_id INT NOT NULL COMMENT 'Proveedor al que se le realizó la compra.',
+    supplier_invoice_number VARCHAR(50) NOT NULL COMMENT 'Número de factura o documento físico emitido por el proveedor.',
+    subtotal DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Suma de importes brutos de la compra antes de impuestos.',
+    tax_total DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Monto total del impuesto de venta pagado en la compra.',
+    total_amount DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Monto total final pagado por la compra.',
+    purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha fiscal o de emisión impresa en la factura del proveedor.',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro de la compra en el sistema.',
+    created_by INT NOT NULL COMMENT 'ID del usuario que registró la compra en el sistema.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    INDEX idx_purchases_tenant (tenant_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 15. Detalle de Compras Directas
+-- 16. Detalle de Compras Directas
 CREATE TABLE IF NOT EXISTS purchase_details (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    purchase_id INT NOT NULL,
-    product_id INT NOT NULL,
-    quantity DECIMAL(12, 4) NOT NULL,
-    unit_cost DECIMAL(12, 4) NOT NULL,
-    subtotal DECIMAL(12, 4) NOT NULL,
-    CONSTRAINT fk_pd_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    CONSTRAINT fk_pd_purchase FOREIGN KEY (purchase_id) REFERENCES purchases(id) ON DELETE CASCADE,
-    CONSTRAINT fk_pd_product FOREIGN KEY (product_id) REFERENCES products(id)
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del detalle de compra.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece esta línea de compra.',
+    purchase_id INT NOT NULL COMMENT 'ID de la compra cabecera a la que pertenece esta línea.',
+    product_id INT NOT NULL COMMENT 'Producto reabastecido en la compra.',
+    quantity DECIMAL(12, 4) NOT NULL COMMENT 'Cantidad de unidades compradas/ingresadas.',
+    unit_cost DECIMAL(12, 4) NOT NULL COMMENT 'Costo unitario de adquisición negociado con el proveedor.',
+    tax_rate DECIMAL(5, 2) NOT NULL DEFAULT 15.00 COMMENT 'Porcentaje de impuesto soportado en la compra.',
+    subtotal DECIMAL(12, 4) NOT NULL COMMENT 'Subtotal bruto calculado para la línea.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (purchase_id) REFERENCES purchases(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
+-- =============================================================================
 -- MÓDULO 4: CONTABILIDAD BÁSICA & GESTIÓN DE CAJA
--- -----------------------------------------------------------------------------
+-- =============================================================================
 
--- 16. Turnos / Lotes de Caja
+-- 17. Turnos / Lotes de Caja
 CREATE TABLE IF NOT EXISTS cash_batches (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    cashier_user_id INT NOT NULL,
-    opening_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    closing_date TIMESTAMP NULL,
-    opening_balance DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
-    expected_amount DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
-    actual_amount DECIMAL(12, 2) NULL DEFAULT 0.00,
-    difference DECIMAL(12, 2) NULL DEFAULT 0.00,
-    total_sales DECIMAL(12, 2) DEFAULT 0.00,
-    status VARCHAR(20) NOT NULL DEFAULT 'OPEN',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT NOT NULL,
-    CONSTRAINT fk_cb_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    CONSTRAINT fk_cb_cashier FOREIGN KEY (cashier_user_id) REFERENCES users(id),
-    CONSTRAINT fk_cb_user FOREIGN KEY (created_by) REFERENCES users(id),
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del turno de caja.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece el turno.',
+    cashier_user_id INT NOT NULL COMMENT 'Cajero asignado a la apertura de la caja.',
+    opening_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de apertura del turno.',
+    closing_date TIMESTAMP NULL COMMENT 'Fecha y hora de cierre del turno.',
+    opening_balance DECIMAL(12, 2) NOT NULL DEFAULT 0.00 COMMENT 'Monto o fondo inicial con el que abre la caja.',
+    expected_amount DECIMAL(12, 2) NOT NULL DEFAULT 0.00 COMMENT 'Monto teórico esperado al cierre.',
+    actual_amount DECIMAL(12, 2) NULL DEFAULT 0.00 COMMENT 'Monto físico reportado al arqueo de cierre.',
+    difference DECIMAL(12, 2) NULL DEFAULT 0.00 COMMENT 'Diferencia o sobrante/faltante al cierre.',
+    total_sales DECIMAL(12, 2) DEFAULT 0.00 COMMENT 'Suma total de ventas cobradas durante el turno.',
+    status VARCHAR(20) NOT NULL DEFAULT 'OPEN' COMMENT 'Estado del turno (OPEN, CLOSED).',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de registro.',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Última actualización.',
+    created_by INT NOT NULL COMMENT 'ID del usuario creador.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (cashier_user_id) REFERENCES users(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
     INDEX idx_cash_batches_tenant (tenant_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 17. Conteo de Billetes y Monedas (Denominaciones)
+-- 18. Conteo de Denominaciones en Caja
 CREATE TABLE IF NOT EXISTS cash_batch_details (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    cash_batch_id INT NOT NULL,
-    bill_value ENUM('0.05', '0.10', '0.20', '0.50', '1', '2', '5', '10', '20', '50', '100', '200', '500') NOT NULL,
-    quantity INT NOT NULL DEFAULT 0,
-    total_amount DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT NOT NULL,
-    CONSTRAINT fk_cbd_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    CONSTRAINT fk_cbd_batch FOREIGN KEY (cash_batch_id) REFERENCES cash_batches(id) ON DELETE CASCADE,
-    CONSTRAINT fk_cbd_user FOREIGN KEY (created_by) REFERENCES users(id)
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador del conteo físico de billetes y monedas.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece el registro.',
+    cash_batch_id INT NOT NULL COMMENT 'Turno de caja asociado.',
+    bill_value ENUM('0.05', '0.10', '0.20', '0.50', '1', '2', '5', '10', '20', '50', '100', '200', '500') NOT NULL COMMENT 'Valor nominativo del billete o moneda.',
+    quantity INT NOT NULL DEFAULT 0 COMMENT 'Cantidad física contada.',
+    total_amount DECIMAL(12, 2) NOT NULL DEFAULT 0.00 COMMENT 'Monto acumulado por la denominación.',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creación.',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Última actualización.',
+    created_by INT NOT NULL COMMENT 'ID del usuario creador.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (cash_batch_id) REFERENCES cash_batches(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 18. Flujo Diario de Movimientos de Caja
+-- 19. Flujo Diario de Movimientos de Caja
 CREATE TABLE IF NOT EXISTS cash_movements (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tenant_id INT NOT NULL,
-    cash_batch_id INT NOT NULL,
-    type VARCHAR(10) NOT NULL, -- 'INCOME', 'EXPENSE'
-    amount DECIMAL(12, 4) NOT NULL,
-    reference_type VARCHAR(50) NOT NULL, -- 'SALE', 'PURCHASE', 'MANUAL_ADJUSTMENT'
-    reference_id INT NULL,
-    description VARCHAR(255) NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by INT NOT NULL,
-    CONSTRAINT fk_cm_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    CONSTRAINT fk_cm_batch FOREIGN KEY (cash_batch_id) REFERENCES cash_batches(id),
-    CONSTRAINT fk_cm_user FOREIGN KEY (created_by) REFERENCES users(id),
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador del movimiento monetario en caja.',
+    tenant_id INT NOT NULL COMMENT 'Empresa a la que pertenece el movimiento.',
+    cash_batch_id INT NOT NULL COMMENT 'Turno de caja donde se realizó la transacción.',
+    type VARCHAR(10) NOT NULL COMMENT 'Tipo de movimiento: INCOME (Ingreso) o EXPENSE (Egreso).',
+    amount DECIMAL(12, 4) NOT NULL COMMENT 'Monto involucrado en la transacción.',
+    reference_type VARCHAR(50) NOT NULL COMMENT 'Origen del movimiento (ej. SALE, PURCHASE, MANUAL_ADJUSTMENT).',
+    reference_id INT NULL COMMENT 'ID del documento de origen.',
+    description VARCHAR(255) NULL COMMENT 'Detalle o justificación del movimiento.',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro.',
+    created_by INT NOT NULL COMMENT 'ID del usuario creador.',
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    FOREIGN KEY (cash_batch_id) REFERENCES cash_batches(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
     INDEX idx_cash_movements_tenant (tenant_id, cash_batch_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
