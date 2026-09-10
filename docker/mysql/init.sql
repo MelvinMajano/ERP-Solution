@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS tenants (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental de la empresa/inquilino (tenant).',
     company_name VARCHAR(150) NOT NULL COMMENT 'Nombre comercial o razón social de la empresa cliente del SaaS.',
     subdomain VARCHAR(50) UNIQUE NOT NULL COMMENT 'Subdominio asignado a la empresa para acceso (ej. empresa.saas.com).',
-    status VARCHAR(20) NOT NULL DEFAULT 'active' COMMENT 'Estado del inquilino en la plataforma SaaS (ej. active, suspended, canceled).',
+    status VARCHAR(20) NOT NULL DEFAULT 'active' COMMENT 'Ciclo de vida SaaS (ej. active, suspended, canceled).',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro de la empresa en la plataforma.',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha y hora de la última actualización de datos de la empresa.'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS rol_permissions (
     FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 7. Usuarios del Sistema
+-- 7. Usuarios del Sistema (Cambiado 'status' por 'is_active')
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del usuario.',
     tenant_id INT NOT NULL COMMENT 'Empresa (tenant) a la que pertenece el usuario.',
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_names VARCHAR(100) NOT NULL COMMENT 'Apellidos del usuario.',
     email VARCHAR(150) NOT NULL COMMENT 'Correo electrónico único del usuario para notificaciones y acceso.',
     rol_id INT NOT NULL COMMENT 'Rol asignado que determina los permisos del usuario.',
-    status VARCHAR(20) DEFAULT 'active' COMMENT 'Estado de la cuenta del usuario (ej. active, inactive, locked).',
+    is_active BOOLEAN DEFAULT TRUE COMMENT 'Indica si la cuenta del usuario está habilitada para acceder al sistema.',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro del usuario.',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha de última actualización del usuario.',
     created_by INT NULL COMMENT 'ID del usuario creador de la cuenta.',
@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS sales_invoices (
     tax_total DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Monto total cobrado por concepto de ISV.',
     net_total DECIMAL(12, 4) NOT NULL DEFAULT 0.0000 COMMENT 'Monto final neto a pagar por el cliente.',
     
-    status VARCHAR(20) NOT NULL DEFAULT 'ISSUED' COMMENT 'Estado de la factura (ej. ISSUED, VOIDED, PENDING).',
+    status VARCHAR(20) NOT NULL DEFAULT 'ISSUED' COMMENT 'Estado del flujo de la factura (ej. ISSUED, VOIDED, PENDING).',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora exacta de emisión de la factura.',
     created_by INT NOT NULL COMMENT 'ID del usuario que registró la factura.',
     FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
@@ -305,7 +305,7 @@ CREATE TABLE IF NOT EXISTS cash_batches (
     actual_amount DECIMAL(12, 2) NULL DEFAULT 0.00 COMMENT 'Monto físico reportado al arqueo de cierre.',
     difference DECIMAL(12, 2) NULL DEFAULT 0.00 COMMENT 'Diferencia o sobrante/faltante al cierre.',
     total_sales DECIMAL(12, 2) DEFAULT 0.00 COMMENT 'Suma total de ventas cobradas durante el turno.',
-    status VARCHAR(20) NOT NULL DEFAULT 'OPEN' COMMENT 'Estado del turno (OPEN, CLOSED).',
+    status VARCHAR(20) NOT NULL DEFAULT 'OPEN' COMMENT 'Estado del proceso del turno (OPEN, CLOSED).',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de registro.',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Última actualización.',
     created_by INT NOT NULL COMMENT 'ID del usuario creador.',
