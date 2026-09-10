@@ -2,8 +2,6 @@
 
 namespace Domain\Entities;
 
-
-use Domain\Exceptions\DomainException;
 use Illuminate\Database\Eloquent\Model;
 use Infrastructure\Traits\BelongsToTenant;
 
