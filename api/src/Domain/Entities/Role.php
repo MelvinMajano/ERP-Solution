@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Domain\Entities;
+namespace Domain\Entities;
 
-use Domain\Exceptions\DomainException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Infrastructure\Traits\BelongsToTenant;
