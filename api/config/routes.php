@@ -1,5 +1,7 @@
 <?php
 
+use Infrastructure\Middlewares\PreAuthMiddleware;
+use Modules\Core\Controllers\AuthController;
 use Modules\Core\Controllers\OnboardingController;
 use Modules\Inventory\Controllers\ProductController;
 use Slim\App;
@@ -10,6 +12,13 @@ return function (App $app){
     $app->group('/auth', function (RouteCollectorProxy $auth) {
         // Ruta pública para registro inicial de Tenant
         $auth->post('/register-tenant', OnboardingController::class);
+
+        // Login Paso 1: Público
+        $auth->post('/check-email', [AuthController::class, 'checkEmail']);
+
+        // Login Paso 2: Protegido por PreAuthMiddleware
+        $auth->post('/login-password', [AuthController::class, 'loginPassword'])
+            ->add(PreAuthMiddleware::class);
     });
     //Modulo de inventario
     $app->group('/products', function(RouteCollectorProxy $products){
