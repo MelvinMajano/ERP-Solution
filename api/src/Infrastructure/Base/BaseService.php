@@ -15,6 +15,6 @@ abstract class BaseService{
      * @throws \Throwable
      */
     protected function transaction(callable $callback):mixed{
-        return DB::transaction();
+        return DB::transaction($callback);
     }
 }
