@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS tenants (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental de la empresa/inquilino (tenant).',
     company_name VARCHAR(150) NOT NULL COMMENT 'Nombre comercial o razón social de la empresa cliente del SaaS.',
     subdomain VARCHAR(50) UNIQUE NOT NULL COMMENT 'Subdominio asignado a la empresa para acceso (ej. empresa.saas.com).',
-    status VARCHAR(20) NOT NULL DEFAULT 'active' COMMENT 'Ciclo de vida SaaS (ej. active, suspended, canceled).',
+    is_active BOOLEAN DEFAULT TRUE COMMENT 'Indica si la empresa está activa en la plataforma SaaS.',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de registro de la empresa en la plataforma.',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha y hora de la última actualización de datos de la empresa.'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS rol_permissions (
     FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 7. Usuarios del Sistema (Cambiado 'status' por 'is_active')
+-- 7. Usuarios del Sistema
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Identificador único incremental del usuario.',
     tenant_id INT NOT NULL COMMENT 'Empresa (tenant) a la que pertenece el usuario.',
