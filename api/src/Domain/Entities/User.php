@@ -3,6 +3,7 @@
 namespace Domain\Entities;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Infrastructure\Traits\BelongsToTenant;
 
 /**
@@ -77,4 +78,9 @@ class User extends Model
     protected $attributes = [
         'is_active' => true,
     ];
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id', 'id');
+    }
 }
