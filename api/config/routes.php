@@ -11,39 +11,34 @@ use Slim\Routing\RouteCollectorProxy;
 
 return function (App $app) {
 
-    // Prefijo global de la API (ejemplo: /api/v1)
-    $basePath = $_ENV['API_BASE_PATH'] ?? '/api/v1';
+    // 1. Módulo de Autenticación y Onboarding
+    $app->group('/auth', function (RouteCollectorProxy $auth) {
+        // Ruta pública para registro inicial de Tenant
+        $auth->post('/register-tenant', OnboardingController::class);
 
-    $app->group($basePath, function (RouteCollectorProxy $router) {
+        // Login Paso 1: Público
+        $auth->post('/check-email', [AuthController::class, 'checkEmail']);
 
-        $router->group('/auth', function (RouteCollectorProxy $auth) {
-            // Onboarding inicial
-            $auth->post('/register-tenant', OnboardingController::class);
+        // Login Paso 2: Protegido únicamente por PreAuthMiddleware
+        $auth->post('/login-password', [AuthController::class, 'loginPassword'])
+            ->add(PreAuthMiddleware::class);
+    });
 
-            // Login Paso 1: Público
-            $auth->post('/check-email', [AuthController::class, 'checkEmail']);
+    // 2. Módulos Privados (Protegidos por Autenticación + Multi-Tenant Scope)
+    $app->group('', function (RouteCollectorProxy $private) {
 
-            // Login Paso 2: Protegido únicamente por PreAuthMiddleware
-            $auth->post('/login-password', [AuthController::class, 'loginPassword'])
-                ->add(PreAuthMiddleware::class);
+        // Recurso de Productos
+        $private->group('/products', function (RouteCollectorProxy $products) {
+            $products->get('', [ProductController::class, 'get']);
+            $products->get('/{id}', [ProductController::class, 'getById']);
+            $products->post('', [ProductController::class, 'create']);
+            $products->put('/{id}', [ProductController::class, 'update']);
+            $products->patch('/{id}/status', [ProductController::class, 'setStatus']);
+            $products->delete('/{id}', [ProductController::class, 'delete']);
         });
 
-        $router->group('', function (RouteCollectorProxy $private) {
+    })
+    ->add(MultiTenantScopeMiddleware::class)
+    ->add(AuthenticactionMiddleware::class);
 
-            // Recurso de Productos
-            $private->group('/products', function (RouteCollectorProxy $products) {
-                $products->get('', [ProductController::class, 'get']);
-                $products->get('/{id}', [ProductController::class, 'getById']);
-                $products->post('', [ProductController::class, 'create']);
-                $products->put('/{id}', [ProductController::class, 'update']);
-                $products->patch('/{id}/status', [ProductController::class, 'setStatus']);
-                $products->delete('/{id}', [ProductController::class, 'delete']);
-            });
-        })
-        // Encadenamiento de middlewares en orden LIFO:
-        // 1. AuthenticactionMiddleware valida el JWT de sesión e inyecta tenant_id y user_id.
-        // 2. MultiTenantScopeMiddleware lee el tenant_id y setea el TenantContext para Eloquent.
-        ->add(MultiTenantScopeMiddleware::class)
-        ->add(AuthenticactionMiddleware::class);
-    });
 };
