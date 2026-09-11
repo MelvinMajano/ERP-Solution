@@ -22,9 +22,8 @@ class ProductController extends BaseController
     public function __construct(
         private readonly ProductService $productService,
         private readonly ProductTransformer $productTransformer
-    )
-    {}
-    public function get(Request $request, Response $response):Response
+    ) {}
+    public function get(Request $request, Response $response): Response
     {
         //Se obtienen los queryParams
         $queryParams = $request->getQueryParams();
@@ -41,14 +40,14 @@ class ProductController extends BaseController
 
         //Se retorna la respuesta(Data + info de paginacionen formato json
         return $this->paginatedResponse(
-            response:$response,
-            paginator:$paginatedData,
+            response: $response,
+            paginator: $paginatedData,
             transformer: $this->productTransformer,
-            message:'Productos obtenidos con exito',
+            message: 'Productos obtenidos con exito',
         );
     }
 
-    public function getById(Request $request, Response $response, array $args):Response
+    public function getById(Request $request, Response $response, array $args): Response
     {
         //se obtiene el id desde los argumentos 
         $id = (int) $args['id'];
@@ -63,19 +62,22 @@ class ProductController extends BaseController
 
         //Se envia la repuesta en formato json al front
         return $this->jsonResponse(
-            response:$response,
-                    //Se transforma la entidad, osea el producto en array asociativo
+            response: $response,
+            //Se transforma la entidad, osea el producto en array asociativo
             data: $this->productTransformer->transform($product),
             message: 'Producto obtenido con exito',
         );
     }
 
-    public function create(Request $request, Response $response):Response
-    {   
+    public function create(Request $request, Response $response): Response
+    {
         //Se obtiene la data desde el body de la request
         $body = $request->getParsedBody();
         //Se valida la data
         $validatedData = ProductValidator::createValidation($body);
+        // Inyectar el user_id de la sesión HTTP al arreglo
+        $userId = (int) $request->getAttribute('user_id');
+        $validatedData['created_by'] = $userId;
         //Se crea el dto de el createProduct a partir de la data validada
         $createDto = CreateProductDTO::fromValidatedData($validatedData);
         //Se crea el producto 
@@ -83,15 +85,15 @@ class ProductController extends BaseController
 
         //Se envia la repuesta en formato json al front
         return $this->jsonResponse(
-            response:$response,
-                     //Se transforma la entidad, osea el producto en array asociativo
+            response: $response,
+            //Se transforma la entidad, osea el producto en array asociativo
             data: $this->productTransformer->transform($product),
             message: 'Producto creado con exito',
             statusCode: StatusCodeInterface::STATUS_CREATED
         );
     }
 
-    public function update(Request $request, Response $response, array $args):Response
+    public function update(Request $request, Response $response, array $args): Response
     {
         //Se obtiene el id desde los arguments
         $id = (int) $args['id'];
@@ -108,22 +110,22 @@ class ProductController extends BaseController
 
         //Se envia la repuesta en formato json al front
         return $this->jsonResponse(
-            response:$response,
-                     //Se transforma la entidad, osea el producto en array asociativo
+            response: $response,
+            //Se transforma la entidad, osea el producto en array asociativo
             data: $this->productTransformer->transform($product),
             message: 'Proudcto actualizado existosamente'
         );
     }
 
-    public function setStatus(Request $resquest, Response $response, array $args):Response
+    public function setStatus(Request $resquest, Response $response, array $args): Response
     {
         //Se obtiene el id desde los arguments
-        $id =(int) $args['id'];
+        $id = (int) $args['id'];
         //Se obtiene el body de la request
         $body = (array) $resquest->getParsedBody();
 
         //Se valida la data, junto con el id
-        $validatedData = ProductValidator::setStatusValidation($id,$body);
+        $validatedData = ProductValidator::setStatusValidation($id, $body);
         //Se crea el dto del setStatus a partir de la data validada
         $setStatusDto = SetStatusProductDTO::fromValidatedData($validatedData);
         //Se obtiene el producto con la data actualizada(El estado actualizado)
@@ -131,28 +133,28 @@ class ProductController extends BaseController
 
         //Se envia la repuesta en formato json al front
         return $this->jsonResponse(
-            response:$response,
-                    //Se transforma la entidad, osea el producto en array asociativo
+            response: $response,
+            //Se transforma la entidad, osea el producto en array asociativo
             data: $this->productTransformer->transform($product),
-            message:'Estado del producto actualizado correctamente',
+            message: 'Estado del producto actualizado correctamente',
         );
     }
 
-    public function delete(Request $request, Response $response, array $args):Response
+    public function delete(Request $request, Response $response, array $args): Response
     {
         //Se obtiene el id desde los arguments
-        $id= (int) $args['id'];
-        
+        $id = (int) $args['id'];
+
         //Se valida la data, junto con el id
         $validatedData = ProductValidator::deleteValidation($id);
-         //Se crea el dto del deleteProduct a partir de la data validada
+        //Se crea el dto del deleteProduct a partir de la data validada
         $deleteDto = DeleteProductDTO::fromValidatedData($validatedData);
         //Se elimina el producto
         $this->productService->deleteProduct($deleteDto);
 
-         //Se envia la repuesta en formato json al front
+        //Se envia la repuesta en formato json al front
         return $this->jsonResponse(
-            response:$response,
+            response: $response,
             data: null,
             message: 'Product eliminado con exito'
         );

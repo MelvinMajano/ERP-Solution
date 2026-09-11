@@ -9,6 +9,7 @@ readonly class CreateProductDTO
         public string $name,
         public float $price,
         public float $cost,
+        public ?int $createdBy = null,
         public ?int $primarySupplierId = null,
         public ?string $barcode = null,
         public float $currentStock = 0.0,
@@ -29,6 +30,7 @@ readonly class CreateProductDTO
          name: (string) $validatedData['name'],
          price: (float) $validatedData['price'],
          cost: (float) $validatedData['cost'],
+         createdBy: isset($validatedData['created_by']) ? (int) $validatedData['created_by'] : null,
          primarySupplierId:isset($validatedData['primary_supplier_id'])?(int) $validatedData['primary_supplier_id']:null,
          barcode: isset($validatedData['barcode'])?(string) $validatedData['barcode']:null,
          currentStock:isset($validatedData['current_stock'])?(float) $validatedData['current_stock']:0.0,
@@ -45,12 +47,13 @@ readonly class CreateProductDTO
     public function toArray():array
     {
         return array_filter([
-           'primary_supplier_id' =>  $this->primarySupplierId,
+            'primary_supplier_id' => $this->primarySupplierId,
             'sku'                 => $this->sku,
             'barcode'             => $this->barcode,
             'name'                => $this->name,
             'price'               => $this->price,
             'cost'                => $this->cost,
+            'created_by'          => $this->createdBy,
             'current_stock'       => $this->currentStock,
             'is_service'          => $this->isService,
             'is_active'           => $this->isActive, 
