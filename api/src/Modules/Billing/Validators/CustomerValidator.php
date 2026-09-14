@@ -19,39 +19,6 @@ class CustomerValidator extends BaseValidator
         'address'   => 'dirección física',
         'is_active' => 'estado activo',
     ];
-
-    /**
-     * Valida los parámetros de consulta recibidos en la listado paginado.
-     */
-    public static function getValidation(array $queryParams): array
-    {
-        $rules = [
-            'page'     => 'nullable|integer|min:1',
-            'pageSize' => 'nullable|integer|min:1|max:100',
-            'sortBy'   => 'nullable|alpha_dash',
-            'sortDir'  => 'nullable|alpha_dash|in:asc,desc,ASC,DESC',
-            'filters'  => 'nullable|array',
-        ];
-
-        $validation = self::makeValidator($queryParams, $rules);
-        $validation->setAliases(self::ALIAS);
-        $validation->validate();
-
-        return static::validationCheck($validation);
-    }
-
-    /**
-     * Valida el ID numérico recibido por la ruta URL.
-     */
-    public static function getByIdValidation(int $id): array
-    {
-        $validation = self::makeValidator(['id' => $id], ['id' => 'required|integer|min:1']);
-        $validation->setAliases(self::ALIAS);
-        $validation->validate();
-
-        return static::validationCheck($validation);
-    }
-
     /**
      * Valida la estructura y restricciones de unicidad para la creación de un cliente.
      */
@@ -91,37 +58,6 @@ class CustomerValidator extends BaseValidator
         ];
 
         $validation = self::makeValidator($payload, $rules);
-        $validation->setAliases(self::ALIAS);
-        $validation->validate();
-
-        return static::validationCheck($validation);
-    }
-
-    /**
-     * Valida el cambio de estado operativo (activo/inactivo).
-     */
-    public static function setStatusValidation(int $id, ?array $data): array
-    {
-        $payload = array_merge($data ?? [], ['id' => $id]);
-
-        $rules = [
-            'id'        => 'required|integer|min:1',
-            'is_active' => 'required|boolean',
-        ];
-
-        $validation = self::makeValidator($payload, $rules);
-        $validation->setAliases(self::ALIAS);
-        $validation->validate();
-
-        return static::validationCheck($validation);
-    }
-
-    /**
-     * Valida la eliminación por ID del cliente.
-     */
-    public static function deleteValidation(int $id): array
-    {
-        $validation = self::makeValidator(['id' => $id], ['id' => 'required|integer|min:1']);
         $validation->setAliases(self::ALIAS);
         $validation->validate();
 
