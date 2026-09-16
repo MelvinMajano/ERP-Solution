@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\CRM\DTOs\CustomersDtos;
+namespace Modules\Billing\DTOs\CustomersDtos;
 
 /**
  * Objeto inmutable para el transporte de datos al crear un cliente.
