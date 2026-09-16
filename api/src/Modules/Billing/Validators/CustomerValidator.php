@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\CRM\Validators;
+namespace Modules\Billing\Validators;
 
 use Domain\Entities\Customer;
 use Infrastructure\Base\BaseValidator;
