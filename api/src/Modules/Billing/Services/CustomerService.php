@@ -10,8 +10,8 @@ use Infrastructure\Base\BaseService;
 use Infrastructure\DTOs\EntityIdDTO;
 use Infrastructure\DTOs\PaginationQueryDTO;
 use Infrastructure\DTOs\SetStatusDTO;
-use Modules\CRM\DTOs\CustomersDtos\CreateCustomerDTO;
-use Modules\CRM\DTOs\CustomersDtos\UpdateCustomerDTO;
+use Modules\Billing\DTOs\CustomersDtos\CreateCustomerDTO;
+use Modules\Billing\DTOs\CustomersDtos\UpdateCustomerDTO;
 
 /**
  * Servicio de Aplicación para la orquestación de casos de uso de Clientes.
