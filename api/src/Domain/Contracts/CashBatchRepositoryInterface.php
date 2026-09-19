@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Domain\Contracts;
 
 use Domain\Entities\CashBatch;
@@ -9,7 +11,10 @@ interface CashBatchRepositoryInterface
 {
     public function findById(int|string $id): ?CashBatch;
 
-    public function findActiveByUserId(int $userId): ?CashBatch;
+    /**
+     * Busca el turno de caja activo para un cajero específico.
+     */
+    public function findActiveByCashierId(int $cashierUserId): ?CashBatch;
 
     public function all(array $params = []): LengthAwarePaginator;
 
