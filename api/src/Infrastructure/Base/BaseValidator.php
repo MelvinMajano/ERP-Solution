@@ -73,6 +73,66 @@ abstract class BaseValidator
         return $validation->getValidatedData();
     }
 
+    /**
+     * Valida la presencia de un ID entero válido en la URL (GET, DELETE, etc.).
+     */
+    public static function validateId(int $id): array
+    {
+        $rules = ['id' => 'required|integer|min:1'];
+        $validation = static::makeValidator(['id' => $id], $rules);
+
+        if (defined('static::ALIAS')) {
+            $validation->setAliases(static::ALIAS);
+        }
+
+        $validation->validate();
+        return static::validationCheck($validation);
+    }
+
+    /**
+     * Valida el payload de actualización de estado activo/inactivo (PATCH /status).
+     */
+    public static function validateStatus(int $id, ?array $data): array
+    {
+        $payload = array_merge($data ?? [], ['id' => $id]);
+        $rules = [
+            'id'        => 'required|integer|min:1',
+            'is_active' => 'required|boolean',
+        ];
+
+        $validation = static::makeValidator($payload, $rules);
+
+        if (defined('static::ALIAS')) {
+            $validation->setAliases(static::ALIAS);
+        }
+
+        $validation->validate();
+        return static::validationCheck($validation);
+    }
+
+    /**
+     * Valida los parámetros de query string para paginación y ordenamiento.
+     */
+    public static function validatePagination(array $queryParams): array
+    {
+        $rules = [
+            'page'     => 'nullable|numeric|min:1',
+            'pageSize' => 'nullable|numeric|min:1|max:100',
+            'sortBy'   => 'nullable|alpha_dash',
+            'sortDir'  => 'nullable|in:asc,desc,ASC,DESC',
+            'filters'  => 'nullable|array',
+        ];
+
+        $validation = static::makeValidator($queryParams, $rules);
+
+        if (defined('static::ALIAS')) {
+            $validation->setAliases(static::ALIAS);
+        }
+
+        $validation->validate();
+        return static::validationCheck($validation);
+    }
+
     /** Reglas de paginación reutilizables */
     protected static function paginationRules(bool $nullable = false): array
     {
