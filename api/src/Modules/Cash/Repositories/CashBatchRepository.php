@@ -10,15 +10,16 @@ class CashBatchRepository extends BaseRepository implements CashBatchRepositoryI
 {
     protected array $sortableColumns = [
         'id',
-        'user_id',
+        'cashier_user_id',
         'opening_balance',
-        'closing_balance',
+        'expected_amount',
+        'actual_amount',
+        'difference',
+        'total_sales',
         'status',
-        'opened_at',
-        'closed_at'
+        'opening_date',
+        'closing_date',
     ];
-
-    protected array $likeColumns = ['notes'];
 
     public function __construct(CashBatch $model)
     {
@@ -31,12 +32,12 @@ class CashBatchRepository extends BaseRepository implements CashBatchRepositoryI
         return parent::findById($id);
     }
 
-    public function findActiveByUserId(int $userId): ?CashBatch
+    public function findActiveByCashierId(int $cashierUserId): ?CashBatch
     {
         /** @var CashBatch|null */
         return $this->query()
-            ->where('user_id', $userId)
-            ->where('status', 'open')
+            ->where('cashier_user_id', $cashierUserId)
+            ->where('status', 'OPEN')
             ->first();
     }
 
