@@ -14,22 +14,30 @@ class CashBatch extends Model
 
     protected $fillable = [
         'tenant_id',
-        'user_id',
+        'cashier_user_id',
+        'opening_date',
+        'closing_date',
         'opening_balance',
-        'closing_balance',
+        'expected_amount',
+        'actual_amount',
+        'difference',
+        'total_sales',
         'status',
-        'notes',
-        'opened_at',
-        'closed_at',
+        'created_by',
     ];
 
     protected $casts = [
+        'cashier_user_id' => 'integer',
         'opening_balance' => 'float',
-        'closing_balance' => 'float',
-        'opened_at'       => 'datetime',
-        'closed_at'       => 'datetime',
-        'created_at'      => 'datetime',
-        'updated_at'      => 'datetime',
+        'expected_amount' => 'float',
+        'actual_amount'  => 'float',
+        'difference'     => 'float',
+        'total_sales'    => 'float',
+        'opening_date'   => 'datetime',
+        'closing_date'   => 'datetime',
+        'created_at'     => 'datetime',
+        'updated_at'     => 'datetime',
+        'created_by'     => 'integer',
     ];
 
     /**
@@ -39,20 +47,8 @@ class CashBatch extends Model
      */
     public function assertIsOpen(): void
     {
-        if ($this->status !== 'open') {
+        if ($this->status !== 'OPEN') {
             throw new DomainException("El turno de caja con ID {$this->id} ya se encuentra cerrado.");
-        }
-    }
-
-    /**
-     * Invariante de entidad: Valida si la caja ya está cerrada.
-     *
-     * @throws DomainException
-     */
-    public function assertIsClosed(): void
-    {
-        if ($this->status === 'closed') {
-            throw new DomainException("El turno de caja ya fue cerrado previamente.");
         }
     }
 }
