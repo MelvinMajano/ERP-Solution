@@ -10,6 +10,8 @@ use Modules\Core\Repositories\TenantRepository;
 use Modules\Core\Repositories\UserRepository;
 use Modules\Core\Repositories\RoleRepository;
 use Modules\Core\Repositories\PermissionRepository;
+use Domain\Contracts\MovementReasonRepositoryInterface;
+use Modules\Inventory\Repositories\MovementReasonRepository;
 use function DI\autowire;
 
 /**
@@ -29,4 +31,5 @@ return[
     UserRepositoryInterface::class => DI\autowire(UserRepository::class),
     RoleRepositoryInterface::class => DI\autowire(RoleRepository::class),
     PermissionRepositoryInterface::class => DI\autowire(PermissionRepository::class),
+    MovementReasonRepositoryInterface::class => DI\autowire(MovementReasonRepository::class),
 ];
