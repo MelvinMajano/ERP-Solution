@@ -70,6 +70,9 @@ class CustomerController extends BaseController
     public function create(Request $request, Response $response): Response
     {
         $validatedData = CustomerValidator::createValidation((array) $request->getParsedBody());
+        // Inyectar el user_id de la sesión HTTP al arreglo
+        $userId = (int) $request->getAttribute('user_id');
+        $validatedData['created_by'] = $userId;
         $createDto = CreateCustomerDTO::fromValidatedData($validatedData);
 
         $customer = $this->customerService->createCustomer($createDto);

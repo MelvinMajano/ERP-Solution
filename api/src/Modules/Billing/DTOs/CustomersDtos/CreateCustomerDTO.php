@@ -13,6 +13,7 @@ readonly class CreateCustomerDTO
         public ?string $email = null,
         public ?string $phone = null,
         public ?string $address = null,
+        public ?int $createdBy = null,
         public bool $isActive = true
     ) {}
 
@@ -29,6 +30,7 @@ readonly class CreateCustomerDTO
             email: isset($validatedData['email']) ? (string) $validatedData['email'] : null,
             phone: isset($validatedData['phone']) ? (string) $validatedData['phone'] : null,
             address: isset($validatedData['address']) ? (string) $validatedData['address'] : null,
+            createdBy: isset($validatedData['created_by']) ? (int) $validatedData['created_by'] : null,
             isActive: (bool) ($validatedData['is_active'] ?? true)
         );
     }
@@ -46,6 +48,7 @@ readonly class CreateCustomerDTO
             'email'     => $this->email,
             'phone'     => $this->phone,
             'address'   => $this->address,
+            'created_by'=> $this->createdBy,
             'is_active' => $this->isActive,
         ], static fn($val) => $val !== null);
     }
