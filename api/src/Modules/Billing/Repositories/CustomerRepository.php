@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\CRM\Repositories;
+namespace Modules\Billing\Repositories;
 
 use Domain\Contracts\CustomerRepositoryInterface;
 use Domain\Entities\Customer;
