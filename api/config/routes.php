@@ -3,8 +3,11 @@
 use Infrastructure\Middlewares\AuthenticactionMiddleware;
 use Infrastructure\Middlewares\MultiTenantScopeMiddleware;
 use Infrastructure\Middlewares\PreAuthMiddleware;
+use Modules\Billing\Controllers\CustomerController;
+use Modules\Cash\Controllers\CashBatchController;
 use Modules\Core\Controllers\AuthController;
 use Modules\Core\Controllers\OnboardingController;
+use Modules\Inventory\Controllers\MovementReasonController;
 use Modules\Inventory\Controllers\ProductController;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
