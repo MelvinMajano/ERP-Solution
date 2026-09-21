@@ -3,8 +3,11 @@
 use Infrastructure\Middlewares\AuthenticactionMiddleware;
 use Infrastructure\Middlewares\MultiTenantScopeMiddleware;
 use Infrastructure\Middlewares\PreAuthMiddleware;
+use Modules\Billing\Controllers\CustomerController;
+use Modules\Cash\Controllers\CashBatchController;
 use Modules\Core\Controllers\AuthController;
 use Modules\Core\Controllers\OnboardingController;
+use Modules\Inventory\Controllers\MovementReasonController;
 use Modules\Inventory\Controllers\ProductController;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
@@ -35,6 +38,33 @@ return function (App $app) {
             $products->put('/{id}', [ProductController::class, 'update']);
             $products->patch('/{id}/status', [ProductController::class, 'setStatus']);
             $products->delete('/{id}', [ProductController::class, 'delete']);
+        });
+
+        // Recurso: Motivos de Movimiento
+        $private->group('/movement-reasons', function (RouteCollectorProxy $reasons) {
+            $reasons->get('', [MovementReasonController::class, 'get']);
+            $reasons->get('/{id}', [MovementReasonController::class, 'getById']);
+            $reasons->post('', [MovementReasonController::class, 'create']);
+            $reasons->put('/{id}', [MovementReasonController::class, 'update']);
+            $reasons->patch('/{id}/status', [MovementReasonController::class, 'setStatus']);
+        });
+
+        // Recurso: Clientes
+        $private->group('/customers', function (RouteCollectorProxy $customers) {
+            $customers->get('', [CustomerController::class, 'get']);
+            $customers->get('/{id}', [CustomerController::class, 'getById']);
+            $customers->post('', [CustomerController::class, 'create']);
+            $customers->put('/{id}', [CustomerController::class, 'update']);
+            $customers->patch('/{id}/status', [CustomerController::class, 'setStatus']);
+        });
+
+        // Recurso: Turnos de Caja
+        $private->group('/cash-batches', function (RouteCollectorProxy $cash) {
+            $cash->get('', [CashBatchController::class, 'get']);
+            $cash->get('/{id}', [CashBatchController::class, 'getById']);
+            $cash->get('/active/cashier/{cashierUserId}', [CashBatchController::class, 'getOpenByCashier']);
+            $cash->post('/open', [CashBatchController::class, 'open']);
+            $cash->post('/{id}/close', [CashBatchController::class, 'close']);
         });
 
     })
