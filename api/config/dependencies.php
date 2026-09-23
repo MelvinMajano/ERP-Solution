@@ -10,6 +10,8 @@ use Modules\Core\Repositories\TenantRepository;
 use Modules\Core\Repositories\UserRepository;
 use Modules\Core\Repositories\RoleRepository;
 use Modules\Core\Repositories\PermissionRepository;
+use Domain\Contracts\CashBatchRepositoryInterface;
+use Modules\Cash\Repositories\CashBatchRepository;
 use function DI\autowire;
 
 /**
@@ -29,4 +31,5 @@ return[
     UserRepositoryInterface::class => DI\autowire(UserRepository::class),
     RoleRepositoryInterface::class => DI\autowire(RoleRepository::class),
     PermissionRepositoryInterface::class => DI\autowire(PermissionRepository::class),
+    CashBatchRepositoryInterface::class => DI\autowire(CashBatchRepository::class),
 ];
