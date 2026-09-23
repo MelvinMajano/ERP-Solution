@@ -12,6 +12,7 @@ use Infrastructure\DTOs\EntityIdDTO;
 use Infrastructure\DTOs\PaginationQueryDTO;
 use Modules\Cash\DTOs\CloseCashBatchDTO;
 use Modules\Cash\DTOs\OpenCashBatchDTO;
+use Carbon\Carbon;
 
 class CashBatchService extends BaseService
 {
@@ -37,7 +38,7 @@ class CashBatchService extends BaseService
 
         $payload = array_merge($dto->toArray(), [
             'status'          => 'OPEN',
-            'opening_date'    => now(),
+            'opened_at' => (new \DateTime())->format('Y-m-d H:i:s'),
             'expected_amount' => $dto->openingBalance,
         ]);
 
@@ -56,7 +57,7 @@ class CashBatchService extends BaseService
             'actual_amount' => $dto->actualAmount,
             'difference'    => $difference,
             'status'        => 'CLOSED',
-            'closing_date'  => now(),
+            'closing_date'  => (new \DateTime())->format('Y-m-d H:i:s'),
         ];
 
         $this->cashBatchRepository->update($dto->id, $updateData);
