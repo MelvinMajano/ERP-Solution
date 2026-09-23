@@ -10,8 +10,8 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Infrastructure\Base\BaseService;
 use Infrastructure\DTOs\EntityIdDTO;
 use Infrastructure\DTOs\PaginationQueryDTO;
-use Modules\Cash\DTOs\CashBatchDtos\CloseCashBatchDTO;
-use Modules\Cash\DTOs\CashBatchDtos\OpenCashBatchDTO;
+use Modules\Cash\DTOs\CloseCashBatchDTO;
+use Modules\Cash\DTOs\OpenCashBatchDTO;
 
 class CashBatchService extends BaseService
 {

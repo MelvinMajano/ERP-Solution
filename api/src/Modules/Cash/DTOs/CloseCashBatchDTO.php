@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Cash\DTOs\CashBatchDtos;
+namespace Modules\Cash\DTOs;
 
 readonly class CloseCashBatchDTO
 {
