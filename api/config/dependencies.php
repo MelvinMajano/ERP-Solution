@@ -12,6 +12,10 @@ use Modules\Core\Repositories\RoleRepository;
 use Modules\Core\Repositories\PermissionRepository;
 use Domain\Contracts\CashBatchRepositoryInterface;
 use Modules\Cash\Repositories\CashBatchRepository;
+use Domain\Contracts\CustomerRepositoryInterface;
+use Modules\Billing\Repositories\CustomerRepository;
+use Domain\Contracts\MovementReasonRepositoryInterface;
+use Modules\Inventory\Repositories\MovementReasonRepository;
 use function DI\autowire;
 
 /**
@@ -32,4 +36,6 @@ return[
     RoleRepositoryInterface::class => DI\autowire(RoleRepository::class),
     PermissionRepositoryInterface::class => DI\autowire(PermissionRepository::class),
     CashBatchRepositoryInterface::class => DI\autowire(CashBatchRepository::class),
+    CustomerRepositoryInterface::class => DI\autowire(CustomerRepository::class),
+    MovementReasonRepositoryInterface::class => DI\autowire(MovementReasonRepository::class),
 ];
