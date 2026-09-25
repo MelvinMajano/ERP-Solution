@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\POS\DTOs;
+namespace Modules\Billing\DTOs;
 
 readonly class CreateSaleDTO
 {
