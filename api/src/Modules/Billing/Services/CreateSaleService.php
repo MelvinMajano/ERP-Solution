@@ -7,7 +7,7 @@ use Domain\Contracts\SaleInvoiceRepositoryInterface;
 use Domain\Entities\SaleInvoice;
 use Domain\Events\SaleCreatedEvent;
 use Domain\Services\InvoiceFinancialEngine;
-use Domain\Services\SaleStockDomainService;
+use Domain\DomainServices\SaleStockDomainService;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Infrastructure\Base\BaseService;
 use Modules\Billing\DTOs\CreateSaleDTO;
