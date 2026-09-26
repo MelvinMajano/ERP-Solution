@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Modules\Billing\Services;
 
 use Domain\Contracts\ProductRepositoryInterface;
