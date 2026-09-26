@@ -1,78 +1,63 @@
 <?php
 
-namespace Modules\POS\Services;
+declare(strict_types=1);
+
+namespace Modules\Billing\Services;
 
 use Domain\Contracts\ProductRepositoryInterface;
 use Domain\Contracts\SaleInvoiceRepositoryInterface;
 use Domain\Entities\SaleInvoice;
 use Domain\Events\SaleCreatedEvent;
-use Domain\DomainServices\SaleStockDomainService;
+use Domain\Services\InvoiceFinancialEngine;
+use Domain\Services\SaleStockDomainService;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Infrastructure\Base\BaseService;
 use Modules\Billing\DTOs\CreateSaleDTO;
 
+/**
+ * Class CreateSaleService
+ *
+ * Orquesta la creación atómica de la factura en el módulo Billing.
+ *
+ * @package Modules\Billing\Services
+ */
 class CreateSaleService extends BaseService
 {
     public function __construct(
         private readonly SaleInvoiceRepositoryInterface $saleInvoiceRepository,
         private readonly ProductRepositoryInterface $productRepository,
-        private readonly SaleStockDomainService $saleStockDomainService // Inyección del Domain Service
+        private readonly SaleStockDomainService $stockDomainService,
+        private readonly InvoiceFinancialEngine $financialEngine
     ) {}
 
     public function execute(CreateSaleDTO $dto): SaleInvoice
     {
         return Capsule::transaction(function () use ($dto) {
-            // 1. Delegamos la lógica cruzada de validación y reserva al Domain Service
-            $updatedProducts = $this->saleStockDomainService->validateAndReserveStock($dto->items);
+            // 1. Invariante de Stock en WMS
+            $updatedProducts = $this->stockDomainService->validateAndReserveStock($dto->items);
 
-            // 2. Calculamos importes y preparamos los detalles
-            $subtotal = 0.0;
-            $discountTotal = 0.0;
-            $preparedDetails = [];
+            // 2. Procesamiento Financiero
+            $summary = $this->financialEngine->process($dto->items);
 
-            foreach ($dto->items as $item) {
-                $lineSubtotal = $item['quantity'] * $item['unit_price'];
-                $lineDiscount = $item['discount'];
+            // 3. Creación de la factura usando la factoría de tu entidad SaleInvoice
+            $invoiceNumber = 'FAC-' . str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT);
+            $saleInvoice = SaleInvoice::createFromDTO($dto, $summary, $invoiceNumber);
+            
+            $this->saleInvoiceRepository->save($saleInvoice);
 
-                $subtotal += $lineSubtotal;
-                $discountTotal += $lineDiscount;
-
-                $preparedDetails[] = [
-                    'product_id' => $item['product_id'],
-                    'quantity'   => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
-                    'discount'   => $lineDiscount,
-                    'subtotal'   => $lineSubtotal - $lineDiscount,
-                ];
+            // 4. Inserción masiva de los detalles respetando las columnas de sales_invoice_details
+            foreach ($summary->lines as $line) {
+                $saleInvoice->details()->create($line->toDatabaseArray());
             }
 
-            // 3. Persistimos la Factura
-            $saleInvoice = $this->saleInvoiceRepository->create([
-                'customer_id'     => $dto->customerId,
-                'cashier_user_id' => $dto->cashierUserId,
-                'cash_batch_id'   => $dto->cashBatchId,
-                'invoice_number'  => 'POS-' . str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT),
-                'subtotal'        => $subtotal,
-                'discount_total'  => $discountTotal,
-                'tax_total'       => 0.0,
-                'net_total'       => $subtotal - $discountTotal,
-                'status'          => 'ISSUED',
-                'notes'           => $dto->notes,
-                'created_by'      => $dto->cashierUserId,
-            ]);
-
-            foreach ($preparedDetails as $detail) {
-                $saleInvoice->details()->create($detail);
-            }
-
-            // 4. Persistimos los cambios de stock devueltos por el Domain Service
+            // 5. Actualización del stock físico en BD
             foreach ($updatedProducts as $product) {
                 $this->productRepository->update($product->id, [
                     'current_stock' => $product->current_stock,
                 ]);
             }
 
-            // 5. Publicamos el evento para los Observers (Kardex, Caja)
+            // 6. Notificación de evento colateral
             event(new SaleCreatedEvent($saleInvoice, $dto->items));
 
             return $saleInvoice;
