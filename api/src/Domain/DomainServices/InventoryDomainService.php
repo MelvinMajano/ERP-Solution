@@ -3,7 +3,7 @@
 namespace Domain\DomainServices;
 
 use Domain\Entities\Product;
-use Modules\Inventory\DTOs\RegisterMovementDTO;
+use Modules\Inventory\DTOs\InventoryMovement\RegisterMovementDTO;
 
 /**
  * Servicio de Dominio responsable de las invariantes del Kardex, recálculo de stock y costos.
