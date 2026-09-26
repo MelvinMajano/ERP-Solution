@@ -27,11 +27,15 @@ class InvoiceFinancialEngine
         foreach ($items as $item) {
             $line = $this->rule->processLine($item);
 
-            $subtotal += $line->subtotal;
-            $discountTotal += $line->discount;
-            $taxableBaseTotal += $line->taxableBase;
-            $taxTotal += $line->tax;
-            $netTotal += $line->total;
+            // Mapeo corregido a las propiedades de CalculatedLineItem
+            $subtotal += $line->lineSubtotal;
+            $discountTotal += $line->lineDiscount;
+            
+            // La base imponible es la diferencia entre el subtotal de línea y su descuento
+            $taxableBaseTotal += ($line->lineSubtotal - $line->lineDiscount);
+            
+            $taxTotal += $line->lineTaxAmount;
+            $netTotal += $line->lineNetTotal;
 
             $processedLines[] = $line;
         }
