@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Inventory\DTOs;
+namespace Modules\Inventory\DTOs\InventoryMovement;
 
 /**
  * DTO inmutable para mapear la creación de un movimiento de inventario.
