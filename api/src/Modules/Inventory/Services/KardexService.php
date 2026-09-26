@@ -8,7 +8,7 @@ use Domain\DomainServices\InventoryDomainService;
 use Domain\Entities\InventoryMovement;
 use Domain\Exceptions\DomainException;
 use Infrastructure\Base\BaseService;
-use Modules\Inventory\DTOs\RegisterMovementDTO;
+use Modules\Inventory\DTOs\InventoryMovement\RegisterMovementDTO;
 
 /**
  * Servicio de Aplicación para la orquestación del Kardex de Inventario.
