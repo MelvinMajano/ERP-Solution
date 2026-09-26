@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Domain\DomainServices\CalculationRules;
 
 use Domain\Contracts\CalculationRuleInterface;
