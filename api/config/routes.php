@@ -4,6 +4,7 @@ use Infrastructure\Middlewares\AuthenticactionMiddleware;
 use Infrastructure\Middlewares\MultiTenantScopeMiddleware;
 use Infrastructure\Middlewares\PreAuthMiddleware;
 use Modules\Billing\Controllers\CustomerController;
+use Modules\Billing\Controllers\SaleController;
 use Modules\Cash\Controllers\CashBatchController;
 use Modules\Core\Controllers\AuthController;
 use Modules\Core\Controllers\OnboardingController;
@@ -65,6 +66,11 @@ return function (App $app) {
             $cash->get('/active/cashier/{cashierUserId}', [CashBatchController::class, 'getOpenByCashier']);
             $cash->post('/open', [CashBatchController::class, 'open']);
             $cash->post('/{id}/close', [CashBatchController::class, 'close']);
+        });
+
+        // Recurso: Ventas y Facturación
+        $private->group('/sales', function (RouteCollectorProxy $sales) {
+            $sales->post('', [SaleController::class, 'store']);
         });
 
     })
