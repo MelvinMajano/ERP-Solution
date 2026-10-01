@@ -18,13 +18,14 @@ readonly class CreateSaleDTO
     /**
      * @param int $customerId Identificador del cliente.
      * @param int $cashierUserId Identificador del usuario emisor/cajero.
-     * @param array<int, SaleItemInput> $items Colección de ítems tipados como Value Objects.
+     * @param list<SaleItemInput> $items Colección de ítems de la venta.
      * @param int|null $cashBatchId Identificador opcional del lote/turno de caja.
      * @param string|null $notes Notas adicionales o descripción.
      */
     public function __construct(
         public int $customerId,
         public int $cashierUserId,
+        /** @var list<SaleItemInput> */
         public array $items,
         public ?int $cashBatchId = null,
         public ?string $notes = null,
@@ -44,9 +45,9 @@ readonly class CreateSaleDTO
             cashierUserId: (int) $validatedData['cashier_user_id'],
             cashBatchId: isset($validatedData['cash_batch_id']) ? (int) $validatedData['cash_batch_id'] : null,
             notes: isset($validatedData['notes']) ? (string) $validatedData['notes'] : null,
-            items: array_map(static fn (array $item) => new SaleItemInput(
+            items: array_map(static fn (array $item): SaleItemInput => new SaleItemInput(
                 productId: (int) $item['product_id'],
-                productName: (string) ($item['product_name'] ?? ''), // Se completa desde DB/Service si viene vacío
+                productName: (string) ($item['product_name'] ?? ''),
                 quantity: (float) $item['quantity'],
                 unitPrice: (float) $item['unit_price'],
                 unitCost: (float) ($item['unit_cost'] ?? 0.0),
@@ -68,7 +69,7 @@ readonly class CreateSaleDTO
             'cashier_user_id' => $this->cashierUserId,
             'cash_batch_id'   => $this->cashBatchId,
             'notes'           => $this->notes,
-            'items'           => array_map(fn (SaleItemInput $item) => [
+            'items'           => array_map(fn (SaleItemInput $item): array => [
                 'product_id' => $item->productId,
                 'quantity'   => $item->quantity,
                 'unit_price' => $item->unitPrice,
