@@ -1,5 +1,6 @@
 <?php
 
+use Domain\Contracts\CalculationRuleInterface;
 use Domain\Contracts\ProductRepositoryInterface;
 use Domain\Contracts\UserRepositoryInterface;
 use Domain\Contracts\RoleRepositoryInterface;
@@ -13,10 +14,13 @@ use Modules\Core\Repositories\PermissionRepository;
 use Domain\Contracts\CashBatchRepositoryInterface;
 use Modules\Cash\Repositories\CashBatchRepository;
 use Domain\Contracts\CustomerRepositoryInterface;
+use Domain\Contracts\EventDispatcherInterface;
 use Domain\Contracts\InventoryMovementRepositoryInterface;
 use Modules\Billing\Repositories\CustomerRepository;
 use Domain\Contracts\MovementReasonRepositoryInterface;
 use Domain\Contracts\SaleInvoiceRepositoryInterface;
+use Domain\DomainServices\StandardTaxCalculationRule;
+use Infrastructure\Events\EventDispatcher;
 use Modules\Billing\Repositories\SaleInvoiceRepository;
 use Modules\Inventory\Repositories\InventoryMovementRepository;
 use Modules\Inventory\Repositories\MovementReasonRepository;
@@ -48,6 +52,8 @@ $repositories =[
     MovementReasonRepositoryInterface::class => DI\autowire(MovementReasonRepository::class),
     SaleInvoiceRepositoryInterface::class       => autowire(SaleInvoiceRepository::class),
     InventoryMovementRepositoryInterface::class => autowire(InventoryMovementRepository::class),
+    CalculationRuleInterface::class            => autowire(StandardTaxCalculationRule::class),
+    EventDispatcherInterface::class            => autowire(EventDispatcher::class),
 ];
 
 return array_merge($repositories, $events);
