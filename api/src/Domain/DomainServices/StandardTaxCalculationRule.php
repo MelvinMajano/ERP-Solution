@@ -1,6 +1,6 @@
 <?php
 
-namespace Domain\DomainServices\CalculationRules;
+namespace Domain\DomainServices;
 
 use Domain\Contracts\CalculationRuleInterface;
 use Domain\ValueObjects\CalculatedLineItem;
