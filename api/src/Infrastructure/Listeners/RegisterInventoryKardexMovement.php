@@ -16,6 +16,11 @@ class RegisterInventoryKardexMovement
     {
         $invoice = $event->saleInvoice;
 
+        $notes = "Salida por venta de factura #{$invoice->invoice_number}";
+        if (!empty($invoice->notes)) {
+            $notes .= " - Nota: {$invoice->notes}";
+        }
+
         foreach ($event->items as $item) {
             $this->kardexService->registerOutput(new RegisterMovementDTO(
                 productId: $item->productId,
@@ -24,7 +29,7 @@ class RegisterInventoryKardexMovement
                 quantity: (float) $item->quantity,
                 referenceType: 'SALE_INVOICE',
                 referenceId: $invoice->id,
-                description: "Salida por venta de factura #{$invoice->invoice_number}",
+                description: $notes,
                 unitCost: (float) ($item->unitPrice ?? 0.0),
                 createdBy: $invoice->created_by,
                 tenantId: $invoice->tenant_id
