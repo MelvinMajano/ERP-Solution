@@ -38,7 +38,7 @@ class SaleStockDomainService
             $product->assertStockAvailable($quantity);
 
             // Mutación del estado en memoria
-            $product->decreaseStock($quantity);
+            $product->applyStockDelta(-$quantity);
             $productsToUpdate[] = $product;
         }
 
