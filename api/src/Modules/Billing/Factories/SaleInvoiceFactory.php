@@ -38,7 +38,6 @@ class SaleInvoiceFactory
         $invoice->tax_total       = $summary->taxTotal;
         $invoice->net_total       = $summary->netTotal;
         $invoice->status          = 'ISSUED';
-        $invoice->notes           = $dto->notes;
         $invoice->created_by      = $dto->cashierUserId; 
 
         return $invoice;
