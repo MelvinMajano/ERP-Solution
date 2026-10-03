@@ -14,7 +14,6 @@ readonly class UpdateProductDTO
         public ?string $barcode = null,
         public ?float $currentStock = null,
         public ?bool $isService = null,
-        public ?bool $isActive = null,
     ) {}
 
     /**
@@ -31,10 +30,9 @@ readonly class UpdateProductDTO
             price: isset($validatedData['price']) ? (float) $validatedData['price'] : null,
             cost: isset($validatedData['cost']) ? (float) $validatedData['cost'] : null,
             primarySupplierId: isset($validatedData['primary_supplier_id']) ? (int) $validatedData['primary_supplier_id'] : null,
-            barcode: isset($validatedData['barcode']) ? (string) $validatedData['barcode'] :  null,
+            barcode: isset($validatedData['barcode']) ? (string) $validatedData['barcode'] : null,
             currentStock: isset($validatedData['current_stock']) ? (float) $validatedData['current_stock'] : null,
             isService: isset($validatedData['is_service']) ? (bool) $validatedData['is_service'] : null,
-            isActive: isset($validatedData['is_active']) ? (bool) $validatedData['is_active'] : null,
         );
     }
 
@@ -55,7 +53,6 @@ readonly class UpdateProductDTO
             'cost'                => $this->cost,
             'current_stock'       => $this->currentStock,
             'is_service'          => $this->isService,
-            'is_active'           => $this->isActive,
         ], static fn($val) => $val !== null);
     }
 }

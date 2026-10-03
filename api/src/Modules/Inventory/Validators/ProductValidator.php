@@ -65,7 +65,6 @@ class ProductValidator extends BaseValidator
             'cost'                => 'nullable|numeric|min:0|max:999999998',
             'current_stock'       => 'nullable|numeric|min:0',
             'is_service'          => 'nullable|boolean',
-            'is_active'           => 'nullable|boolean',
         ];
 
         $validation = self::makeValidator($payload, $rules);
