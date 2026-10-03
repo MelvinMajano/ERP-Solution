@@ -69,6 +69,9 @@ class CreateSaleService extends BaseService
             // 7. Emisión del evento de dominio desacoplado
             $this->eventDispatcher->dispatch(new SaleCreatedEvent($saleInvoice, $dto->items));
 
+            // Carga la relación con los IDs e importes recién guardados
+            $saleInvoice->load('details');
+
             return $saleInvoice;
         });
     }

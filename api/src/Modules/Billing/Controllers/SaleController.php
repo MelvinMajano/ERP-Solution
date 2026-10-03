@@ -46,7 +46,7 @@ class SaleController
         $payload = [
             'success' => true,
             'message' => 'Venta creada y facturada exitosamente.',
-            'data'    => $this->saleTransformer->transform($invoice),
+            'data' => $this->saleTransformer->transform($invoice, $dto->notes),
         ];
 
         $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_UNICODE));
