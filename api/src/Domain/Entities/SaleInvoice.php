@@ -33,6 +33,8 @@ class SaleInvoice extends Model
 
     protected $table = 'sales_invoices';
 
+    public const UPDATED_AT = null;
+
     protected $fillable = [
         'tenant_id',
         'customer_id',
