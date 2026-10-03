@@ -2,20 +2,22 @@
 
 namespace Modules\Billing\Services;
 
+use Domain\Contracts\EventDispatcherInterface;
 use Domain\Contracts\ProductRepositoryInterface;
 use Domain\Contracts\SaleInvoiceRepositoryInterface;
+use Domain\DomainServices\InvoiceFinancialEngine;
+use Domain\DomainServices\SaleStockDomainService;
 use Domain\Entities\SaleInvoice;
 use Domain\Events\SaleCreatedEvent;
-use Domain\Services\InvoiceFinancialEngine;
-use Domain\Services\SaleStockDomainService;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Infrastructure\Base\BaseService;
 use Modules\Billing\DTOs\CreateSaleDTO;
+use Modules\Billing\Factories\SaleInvoiceFactory;
 
 /**
  * Class CreateSaleService
  *
- * Orquesta la creación atómica de la factura en el módulo Billing.
+ * Servicio de aplicación encargada de orquestar la transacción atómica de creación de factura.
  *
  * @package Modules\Billing\Services
  */
@@ -25,38 +27,50 @@ class CreateSaleService extends BaseService
         private readonly SaleInvoiceRepositoryInterface $saleInvoiceRepository,
         private readonly ProductRepositoryInterface $productRepository,
         private readonly SaleStockDomainService $stockDomainService,
-        private readonly InvoiceFinancialEngine $financialEngine
+        private readonly InvoiceFinancialEngine $financialEngine,
+        private readonly SaleInvoiceFactory $invoiceFactory,
+        private readonly EventDispatcherInterface $eventDispatcher
     ) {}
 
+    /**
+     * Ejecuta la creación atómica de la factura de venta.
+     *
+     * @param CreateSaleDTO $dto
+     * @return SaleInvoice
+     */
     public function execute(CreateSaleDTO $dto): SaleInvoice
     {
         return Capsule::transaction(function () use ($dto) {
-            // 1. Invariante de Stock en WMS
+            // 1. Validación de Invariante de Stock en WMS
             $updatedProducts = $this->stockDomainService->validateAndReserveStock($dto->items);
 
-            // 2. Procesamiento Financiero
+            // 2. Procesamiento Financiero (Motor extensible)
             $summary = $this->financialEngine->process($dto->items);
 
-            // 3. Creación de la factura usando la factoría de tu entidad SaleInvoice
+            // 3. Ensamblado limpio mediante la Factoría dedicada (cumpliendo SRP)
             $invoiceNumber = 'FAC-' . str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT);
-            $saleInvoice = SaleInvoice::createFromDTO($dto, $summary, $invoiceNumber);
-            
+            $saleInvoice = $this->invoiceFactory->createFromDTO($dto, $summary, $invoiceNumber);
+
+            // 4. Persistencia de la cabecera mediante la interfaz del repositorio
             $this->saleInvoiceRepository->save($saleInvoice);
 
-            // 4. Inserción masiva de los detalles respetando las columnas de sales_invoice_details
+            // 5. Asentamiento del detalle histórico (snapshots)
             foreach ($summary->lines as $line) {
                 $saleInvoice->details()->create($line->toDatabaseArray());
             }
 
-            // 5. Actualización del stock físico en BD
+            // 6. Actualización física de inventario en base de datos
             foreach ($updatedProducts as $product) {
                 $this->productRepository->update($product->id, [
                     'current_stock' => $product->current_stock,
                 ]);
             }
 
-            // 6. Notificación de evento colateral
-            event(new SaleCreatedEvent($saleInvoice, $dto->items));
+            // 7. Emisión del evento de dominio desacoplado
+            $this->eventDispatcher->dispatch(new SaleCreatedEvent($saleInvoice, $dto->items));
+
+            // Carga la relación con los IDs e importes recién guardados
+            $saleInvoice->load('details');
 
             return $saleInvoice;
         });

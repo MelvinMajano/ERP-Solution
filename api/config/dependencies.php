@@ -1,5 +1,6 @@
 <?php
 
+use Domain\Contracts\CalculationRuleInterface;
 use Domain\Contracts\ProductRepositoryInterface;
 use Domain\Contracts\UserRepositoryInterface;
 use Domain\Contracts\RoleRepositoryInterface;
@@ -13,8 +14,15 @@ use Modules\Core\Repositories\PermissionRepository;
 use Domain\Contracts\CashBatchRepositoryInterface;
 use Modules\Cash\Repositories\CashBatchRepository;
 use Domain\Contracts\CustomerRepositoryInterface;
+use Domain\Contracts\EventDispatcherInterface;
+use Domain\Contracts\InventoryMovementRepositoryInterface;
 use Modules\Billing\Repositories\CustomerRepository;
 use Domain\Contracts\MovementReasonRepositoryInterface;
+use Domain\Contracts\SaleInvoiceRepositoryInterface;
+use Domain\DomainServices\StandardTaxCalculationRule;
+use Infrastructure\Events\EventDispatcher;
+use Modules\Billing\Repositories\SaleInvoiceRepository;
+use Modules\Inventory\Repositories\InventoryMovementRepository;
 use Modules\Inventory\Repositories\MovementReasonRepository;
 use function DI\autowire;
 
@@ -28,7 +36,11 @@ use function DI\autowire;
  *   SupplierRepositoryInterface::class => autowire(SupplierRepository::class),
  * -------------------------------------------------------------------------
  */
-return[
+
+// Cargar la configuración de eventos desde config/events.php
+$events = require __DIR__ . '/events.php';
+
+$repositories =[
     // Mapeo de la Interfaz de Dominio con su Implementación Concreta de Repositorio
     ProductRepositoryInterface::class => autowire(ProductRepository::class),
     TenantRepositoryInterface::class => DI\autowire(TenantRepository::class),
@@ -38,4 +50,10 @@ return[
     CashBatchRepositoryInterface::class => DI\autowire(CashBatchRepository::class),
     CustomerRepositoryInterface::class => DI\autowire(CustomerRepository::class),
     MovementReasonRepositoryInterface::class => DI\autowire(MovementReasonRepository::class),
+    SaleInvoiceRepositoryInterface::class       => autowire(SaleInvoiceRepository::class),
+    InventoryMovementRepositoryInterface::class => autowire(InventoryMovementRepository::class),
+    CalculationRuleInterface::class            => autowire(StandardTaxCalculationRule::class),
+    EventDispatcherInterface::class            => autowire(EventDispatcher::class),
 ];
+
+return array_merge($repositories, $events);

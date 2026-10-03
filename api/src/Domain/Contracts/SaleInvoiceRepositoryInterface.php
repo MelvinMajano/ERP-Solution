@@ -10,6 +10,13 @@ use Domain\Entities\SaleInvoice;
 interface SaleInvoiceRepositoryInterface
 {
     /**
+     * Persiste o actualiza en la capa de almacenamiento la entidad de una factura de venta.
+     *
+     * @param SaleInvoice $saleInvoice Entidad de dominio de la factura a guardar.
+     * @return SaleInvoice
+     */
+    public function save(SaleInvoice $saleInvoice): SaleInvoice;
+    /**
      * Registra en persistencia la cabecera y el detalle de una factura de venta.
      *
      * @param array<string, mixed> $data
