@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Mail, ArrowRight } from 'lucide-react';
-
-import { checkEmailSchema } from '@domain/schemas/auth.schema';
-import type {  CheckEmailFormValues } from '@domain/schemas/auth.schema';
+import { checkEmailSchema, type CheckEmailFormValues} from '@domain/schemas/auth.schema';
 import { checkEmailAction } from '../actions/checkEmailAction';
 import { useAuthStore } from '../store/useAuthStore';
 import { Button } from '@infrastructure/components/ui/button';
