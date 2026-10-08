@@ -1,9 +1,10 @@
+import { LandingPage } from '@modules/public/pages/LandingPage'
 import './App.css'
 
 function App() {
   return (
     <>
-      <h1>hola</h1>
+      <LandingPage></LandingPage>
     </>
   )
 }

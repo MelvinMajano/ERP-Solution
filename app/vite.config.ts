@@ -9,10 +9,10 @@ export default defineConfig({
   plugins: [react(),tailwindcss(),],
   resolve: {
     alias: {
-      '@config': path.resolve(__dirname, './src/config'),
-      '@infrastructure': path.resolve(__dirname, './src/infrastructure'),
-      '@domain': path.resolve(__dirname, './src/domain'),
-      '@modules': path.resolve(__dirname, './src/modules'),
+      '@config': path.resolve(import.meta.dirname, './src/config'),
+      '@infrastructure': path.resolve(import.meta.dirname, './src/infrastructure'),
+      '@domain': path.resolve(import.meta.dirname, './src/domain'),
+      '@modules': path.resolve(import.meta.dirname, './src/modules'),
     },
   },
 })
