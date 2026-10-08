@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Lock, ArrowLeft, Building2 } from 'lucide-react';
-
-import { loginPasswordSchema } from '@domain/schemas/auth.schema';
-import type { LoginPasswordFormValues } from '@domain/schemas/auth.schema';
+import { loginPasswordSchema, type LoginPasswordFormValues} from '@domain/schemas/auth.schema';
 import { loginPasswordAction } from '../actions/loginPasswordAction';
 import { useAuthStore } from '../store/useAuthStore';
 import { Button } from '@infrastructure/components/ui/button';
