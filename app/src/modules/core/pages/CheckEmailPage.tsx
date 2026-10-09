@@ -7,7 +7,7 @@ import { checkEmailAction } from '@modules/core/actions/checkEmailAction';
 import { useAuthStore } from '@modules/core/store/useAuthStore';
 import { cn } from '@infrastructure/utils/cn';
 
-export const CheckEmailView: React.FC = () => {
+export const CheckEmailPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const setPreAuthData = useAuthStore((state) => state.setPreAuthData);
   const navigate = useNavigate();

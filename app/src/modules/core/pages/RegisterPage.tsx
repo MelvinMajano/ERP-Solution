@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FormRegisterTenant } from '@modules/core/components/FormRegisterTenant';
 
-export const RegisterView: React.FC = () => {
+export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleSuccess = () => {

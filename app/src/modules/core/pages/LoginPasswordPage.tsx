@@ -7,7 +7,7 @@ import { loginPasswordAction } from '@modules/core/actions/loginPasswordAction';
 import { useAuthStore } from '@modules/core/store/useAuthStore';
 import { cn } from '@infrastructure/utils/cn';
 
-export const LoginPasswordView: React.FC = () => {
+export const LoginPasswordPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
