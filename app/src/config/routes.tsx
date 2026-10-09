@@ -1,19 +1,24 @@
 import { createBrowserRouter } from 'react-router-dom';
-import { RegisterView } from '@modules/core/views/RegisterView';
-import { CheckEmailView } from '@modules/core/views/CheckEmailView';
-import { LoginPasswordView } from '@modules/core/views/LoginPasswordView';
+import { LandingPage } from '@modules/public/pages/LandingPage';
+import { CheckEmailPage } from '@modules/core/pages/CheckEmailPage';
+import { LoginPasswordPage } from '@modules/core/pages/LoginPasswordPage';
+import { RegisterPage } from '@modules/core/pages/RegisterPage';
 
 export const router = createBrowserRouter([
   {
-    path: '/register',
-    element: <RegisterView />,
+    path: '/',
+    element: <LandingPage />,
   },
   {
     path: '/login',
-    element: <CheckEmailView />,
+    element: <CheckEmailPage />,
   },
   {
     path: '/login/password',
-    element: <LoginPasswordView />,
+    element: <LoginPasswordPage />,
+  },
+  {
+    path: '/register',
+    element: <RegisterPage />,
   },
 ]);
