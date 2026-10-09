@@ -1,12 +1,9 @@
-import { LandingPage } from '@modules/public/pages/LandingPage'
 import './App.css'
+import { RouterProvider } from 'react-router-dom'
+import { router } from '@config/routes'
 
-function App() {
-  return (
-    <>
-      <LandingPage></LandingPage>
-    </>
-  )
+const App =() =>{
+  return <RouterProvider router={router} />;
 }
 
 export default App
