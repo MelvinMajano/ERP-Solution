@@ -38,7 +38,7 @@ export const FormRegisterTenant: React.FC<FormRegisterTenantProps> = ({ onSucces
         onSuccess();
       }
     } catch {
-      // Los errores HTTP son manejados globalmente por el ErrorHandler/Axios interceptor
+      // Manejado globalmente
     } finally {
       setIsSubmitting(false);
     }
@@ -48,12 +48,12 @@ export const FormRegisterTenant: React.FC<FormRegisterTenantProps> = ({ onSucces
     <form onSubmit={handleSubmit(onSubmit)} className={cn('space-y-4', className)} noValidate>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Nombre de la Empresa</label>
+          <label className="block text-sm font-medium text-slate-700">Nombre de la Empresa</label>
           <input
             type="text"
             {...register('company_name')}
             className={cn(
-              'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm',
+              'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm',
               errors.company_name && 'border-red-500 focus:border-red-500 focus:ring-red-500'
             )}
             placeholder="Mi Empresa S.A."
@@ -64,12 +64,12 @@ export const FormRegisterTenant: React.FC<FormRegisterTenantProps> = ({ onSucces
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Subdominio</label>
+          <label className="block text-sm font-medium text-slate-700">Subdominio</label>
           <input
             type="text"
             {...register('subdomain')}
             className={cn(
-              'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm',
+              'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm',
               errors.subdomain && 'border-red-500 focus:border-red-500 focus:ring-red-500'
             )}
             placeholder="mi-empresa"
@@ -82,12 +82,12 @@ export const FormRegisterTenant: React.FC<FormRegisterTenantProps> = ({ onSucces
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Nombres</label>
+          <label className="block text-sm font-medium text-slate-700">Nombres</label>
           <input
             type="text"
             {...register('first_names')}
             className={cn(
-              'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm',
+              'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm',
               errors.first_names && 'border-red-500 focus:border-red-500 focus:ring-red-500'
             )}
             placeholder="Juan"
@@ -98,12 +98,12 @@ export const FormRegisterTenant: React.FC<FormRegisterTenantProps> = ({ onSucces
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Apellidos</label>
+          <label className="block text-sm font-medium text-slate-700">Apellidos</label>
           <input
             type="text"
             {...register('last_names')}
             className={cn(
-              'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm',
+              'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm',
               errors.last_names && 'border-red-500 focus:border-red-500 focus:ring-red-500'
             )}
             placeholder="Pérez"
@@ -116,12 +116,12 @@ export const FormRegisterTenant: React.FC<FormRegisterTenantProps> = ({ onSucces
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Nombre de Usuario</label>
+          <label className="block text-sm font-medium text-slate-700">Nombre de Usuario</label>
           <input
             type="text"
             {...register('username')}
             className={cn(
-              'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm',
+              'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm',
               errors.username && 'border-red-500 focus:border-red-500 focus:ring-red-500'
             )}
             placeholder="jperez"
@@ -132,12 +132,12 @@ export const FormRegisterTenant: React.FC<FormRegisterTenantProps> = ({ onSucces
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+          <label className="block text-sm font-medium text-slate-700">Correo Electrónico</label>
           <input
             type="email"
             {...register('email')}
             className={cn(
-              'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm',
+              'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm',
               errors.email && 'border-red-500 focus:border-red-500 focus:ring-red-500'
             )}
             placeholder="admin@empresa.com"
@@ -149,12 +149,12 @@ export const FormRegisterTenant: React.FC<FormRegisterTenantProps> = ({ onSucces
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+        <label className="block text-sm font-medium text-slate-700">Contraseña</label>
         <input
           type="password"
           {...register('password')}
           className={cn(
-            'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm',
+            'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm',
             errors.password && 'border-red-500 focus:border-red-500 focus:ring-red-500'
           )}
           placeholder="••••••••"
@@ -167,7 +167,7 @@ export const FormRegisterTenant: React.FC<FormRegisterTenantProps> = ({ onSucces
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+        className="w-full rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
       >
         {isSubmitting ? 'Registrando...' : 'Registrar Empresa'}
       </button>

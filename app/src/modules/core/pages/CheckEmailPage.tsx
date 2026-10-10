@@ -27,37 +27,35 @@ export const CheckEmailPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       const response = await checkEmailAction(values.email);
-      // Guarda token temporal y tenants en Zustand
       setPreAuthData(response.data.pre_auth_token, response.data.tenants);
-      // Redirige al paso 2 de ingreso de contraseña
       navigate('/login/password');
     } catch {
-      // Manejado globalmente por el ErrorHandler
+      // Manejado globalmente por el Interceptor
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4 dark:bg-gray-900">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-md border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 font-sans">
+      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg border border-emerald-100">
         <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Iniciar Sesión</h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <h2 className="text-2xl font-bold text-slate-800">Iniciar Sesión</h2>
+          <p className="mt-1 text-sm text-slate-500">
             Ingresa tu correo electrónico para verificar tu cuenta
           </p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-slate-700">
               Correo Electrónico
             </label>
             <input
               type="email"
               {...register('email')}
               className={cn(
-                'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white',
+                'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500',
                 errors.email && 'border-red-500 focus:border-red-500 focus:ring-red-500'
               )}
               placeholder="ejemplo@empresa.com"
@@ -70,17 +68,17 @@ export const CheckEmailPage: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+            className="w-full rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
           >
             {isSubmitting ? 'Verificando...' : 'Continuar'}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+        <div className="mt-6 text-center text-sm text-slate-500">
           ¿No tienes una empresa registrada?{' '}
           <Link
             to="/register"
-            className="font-medium text-blue-600 hover:underline dark:text-blue-400"
+            className="font-medium text-emerald-600 hover:underline"
           >
             Regístrate aquí
           </Link>
