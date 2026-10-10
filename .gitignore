@@ -2,3 +2,4 @@
 /api/.env
 /docker/.env
 /app/node_modules
+/app/.env
